@@ -1,62 +1,54 @@
 <?php
 
+declare(strict_types=1);
+
 namespace KivWeb;
+
+use \Tracy\Debugger,
+    \Tracy\ILogger as LogLevel;
 
 class App {
     
-    const ACTION_KEY = 'p';
-    const ACTION_DELIMITER = '/';
-    const DEFAULT_CONTROLLER = 'Index';
-    const DEFAULT_METHOD = 'index';
-    const METHOD_SUFFIX = 'Action';
-    
+    private $router;
+
+
     public function run() {
         
-        $action = array_key_exists(self::ACTION_KEY, $_GET) ? $_GET[self::ACTION_KEY] : '';
+        $route = array_key_exists(self::ACTION_KEY, $_GET) && is_string($_GET[self::ACTION_KEY]) ? $_GET[self::ACTION_KEY] : '';
         
-        //todo databáze
+        //todo services initialize
         
-        $this->route($action);
+        $this->route($route);
     }
     
-    private function route($action) {
+    public function response404(string $reason = '') {
         
-        $parts = explode(self::ACTION_DELIMITER, $action, 2);
-        
-        $name = self::DEFAULT_CONTROLLER;
-        $method = self::DEFAULT_METHOD . self::METHOD_SUFFIX;
-        
-        if($parts[0] !== '') {
-            
-            $name = $parts[0];
-            $name[0] = \chr(\ord($name[0]) - 32); //první písmeno vždy velké, todo co když to bude utf8?
-            
-            if(array_key_exists(1, $parts) && $parts[1] !== '') {
-                $method = $parts[1] . self::METHOD_SUFFIX;
-            }
-        }
-        
-        $nsName = '\\' . __NAMESPACE__ . '\\Controllers\\' . $name;
-        
-        var_dump($nsName, class_exists($nsName));
-        
-        //kontroler existuje
-        if(class_exists($nsName)) {
-            
-            $controller = new $nsName;
-            
-            //metodu lze zavolat
-            if(is_callable(array($controller, $method))) {
-                $controller->{$method}();
-                return;
-            }
+        //log reason
+        if($reason !== '') {
+            Debugger::log("HTTP 404 reason: $reason", LogLevel::INFO);
+            Debugger::fireLog("HTTP 404 reason: $reason");
         }
         
         header("{$_SERVER['SERVER_PROTOCOL']} 404 Not Found", true, 404);
-        echo 404; //todo
+        echo 404; //todo body
     }
     
-    public function getUrl($action) {
+    public function response500(string $reason = '') {
+        
+        //log reason
+        if($reason !== '') {
+            Debugger::log("HTTP 500 reason: $reason", LogLevel::CRITICAL);
+            Debugger::fireLog("HTTP 500 reason: $reason");
+        }
+        
+//        header("{$_SERVER['SERVER_PROTOCOL']} Internal Server Error", true, 500); //todo fixit, makes 502
+        echo 500; //todo body
+    }
+    
+    public function getUrl(string $controller, string $method, array $query = []) {
+        
+        return ;
+        
         //todo
     }
 }
