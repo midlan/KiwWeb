@@ -4,7 +4,8 @@
         "route_delimiter" : "/",
         "default_section" : "index",
         "default_action" : "index",
-        "controller_namespace" : "KivWeb\\Controllers"
+        "controller_namespace" : "\\KivWeb\\Controllers",
+        "controller_parent" : "BaseController"
     },
     "twig" : {
         

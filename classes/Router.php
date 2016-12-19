@@ -17,13 +17,15 @@ class Router {
     private $defaultSection;
     private $defaultAction;
     private $controllersNamespace;
+    private $controllersParent;
 
-    public function __construct($routeKey, $routeDelimiter, $defaultSection, $defaultAction, $controllersNamespace) {
+    public function __construct($routeKey, $routeDelimiter, $defaultSection, $defaultAction, $controllersNamespace, $controllersParent) {
         $this->routeKey = $routeKey;
         $this->routeDelimiter = $routeDelimiter;
         $this->defaultSection = $defaultSection;
         $this->defaultAction = $defaultAction;
         $this->controllersNamespace = $controllersNamespace;
+        $this->controllersParent = $controllersParent;
     }
     
     public function buildUrlPath(string $section, string $action, array $query = []) {
@@ -82,7 +84,7 @@ class Router {
         return [$section, $action];
     }
     
-    public function getControllerClass(string $section = '', string $namespace = '') {
+    public function getControllerClass(string $section = '') {
         
         if($section === '') {
             $section = $this->defaultSection;
@@ -90,7 +92,7 @@ class Router {
         
         $section[0] = \chr(\ord($section[0]) - 32); //zvětšit první písmeno, jen pokud bylo malé; todo co utf8?
         
-        return "$namespace\\$section";
+        return "$this->controllersNamespace\\$section";
     }
     
     public function getControllerMethod(string $action = '') {
@@ -114,7 +116,7 @@ class Router {
         list($section, $action) = $this->parseRoute($route);
         
         //záskání názvu třídy a metody
-        $class = $this->getControllerClass($section, $this->controllersNamespace);
+        $class = $this->getControllerClass($section);
         $method = $this->getControllerMethod($action);
         
         //kontrola existence třídy kontroleru
@@ -123,11 +125,14 @@ class Router {
             return;
         }
         
+        //instance
         $controller = new $class;
         
         //kontrola platnosti kontroleru
-        if(!($controller instanceof Controllers\BaseController)) {
-            $app->response500("$class is not child of BaseController");
+        $parentClass = $this->controllersNamespace . '\\' . $this->controllersParent;
+        
+        if(!($controller instanceof $parentClass)) {
+            $app->response500("$class is not child of $parentClass");
             return;
         }
             

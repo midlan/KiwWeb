@@ -28,7 +28,8 @@ class App {
                 $conf['route_delimiter'],
                 $conf['default_section'],
                 $conf['default_action'],
-                $conf['controller_namespace']
+                $conf['controller_namespace'],
+                $conf['controller_parent']
             );
         }
         
