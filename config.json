@@ -8,7 +8,12 @@
         "controller_parent" : "BaseController"
     },
     "twig" : {
-        
+        "templates_dir" : "../templates",
+        "environment" : {
+            "cache" : "../temp",
+            "strict_variables" : true,
+            "autoescape" : true
+        }
     },
     "pdo" : {
         

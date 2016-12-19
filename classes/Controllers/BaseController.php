@@ -6,8 +6,18 @@ namespace KivWeb\Controllers;
 
 abstract class BaseController {
     
+    private $app;
+    
+    /**
+     * 
+     * @return \KivWeb\App
+     */
+    final protected function getApp() {
+        return $this->app;
+    }
+    
     final public function init(\KivWeb\App $app) {
-        //todo get db, user, session, template, etc
+        $this->app = $app;
     }
     
     abstract public function getPermissionLevel();

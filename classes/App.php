@@ -10,8 +10,11 @@ use \Tracy\Debugger,
 class App {
     
     private $config;
-    private $router;
-    private $pdo;
+    
+    //services
+    private $router = null;
+    private $twig = null;
+    private $pdo = null;
     
     /**
      * 
@@ -34,6 +37,19 @@ class App {
         }
         
         return $this->router;
+    }
+    
+    public function getTwig() {
+        
+        if($this->twig === null) {
+            
+            $conf = $this->config['twig'];
+            
+            $loader = new \Twig_Loader_Filesystem($conf['templates_dir']);
+            $this->twig = new \Twig_Environment($loader, $conf['environment']);
+        }
+        
+        return $this->twig;
     }
     
     public function getPdo() {

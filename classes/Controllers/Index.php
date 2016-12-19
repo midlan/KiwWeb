@@ -5,7 +5,12 @@ namespace KivWeb\Controllers;
 class Index extends BaseController {
     
     public function indexAction() {
-        echo 'Heuréka';
+        
+        $twig = $this->getApp()->getTwig();
+        
+        $template = $twig->load('skeleton.twig');
+        
+        echo $template->render(array('a_variable' => 'Hello world!'));
     }
 
     public function getPermissionLevel() {
