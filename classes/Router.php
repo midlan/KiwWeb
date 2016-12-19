@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace KivWeb;
 
-use \Tracy\Debugger,
-    \Tracy\ILogger as LogLevel;
-
 class Router {
     
     const ROUTE_KEY = 'p';
@@ -21,9 +18,12 @@ class Router {
     private $defaultAction;
     private $controllersNamespace;
 
-
-    public function __construct() {
-        
+    public function __construct($routeKey, $routeDelimiter, $defaultSection, $defaultAction, $controllersNamespace) {
+        $this->routeKey = $routeKey;
+        $this->routeDelimiter = $routeDelimiter;
+        $this->defaultSection = $defaultSection;
+        $this->defaultAction = $defaultAction;
+        $this->controllersNamespace = $controllersNamespace;
     }
     
     public function buildUrlPath(string $section, string $action, array $query = []) {
@@ -88,7 +88,7 @@ class Router {
             $section = $this->defaultSection;
         }
         
-        $sction[0] = \chr(\ord($sction[0]) - 32); //zvětšit první písmeno, jen pokud bylo malé; todo co utf8?
+        $section[0] = \chr(\ord($section[0]) - 32); //zvětšit první písmeno, jen pokud bylo malé; todo co utf8?
         
         return "$namespace\\$section";
     }
@@ -113,9 +113,8 @@ class Router {
         
         list($section, $action) = $this->parseRoute($route);
         
-        //todo namesapce
-        
-        $class = $this->getControllerClass($section, $namespace);
+        //záskání názvu třídy a metody
+        $class = $this->getControllerClass($section, $this->controllersNamespace);
         $method = $this->getControllerMethod($action);
         
         //kontrola existence třídy kontroleru
@@ -128,8 +127,7 @@ class Router {
         
         //kontrola platnosti kontroleru
         if(!($controller instanceof Controllers\BaseController)) {
-            Debugger::log("404 reason: $class is not child of BaseController");
-            //todo 500
+            $app->response500("$class is not child of BaseController");
             return;
         }
             
@@ -141,7 +139,7 @@ class Router {
         
         //todo práva
         
-        //inicializace a zavolání
+        //inicializace a zavolání kontroleru
         $controller->init($app);
         $controller->{$method}();
     }

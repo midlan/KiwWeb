@@ -1,0 +1,15 @@
+{
+    "router" : {
+        "route_key" : "p",
+        "route_delimiter" : "/",
+        "default_section" : "index",
+        "default_action" : "index",
+        "controller_namespace" : "KivWeb\\Controllers"
+    },
+    "twig" : {
+        
+    },
+    "pdo" : {
+        
+    }
+}
