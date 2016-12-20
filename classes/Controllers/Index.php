@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace KivWeb\Controllers;
 
 class Index extends BaseController {
@@ -13,8 +15,8 @@ class Index extends BaseController {
         echo $template->render(array('a_variable' => 'Hello world!'));
     }
 
-    public function getPermissionLevel() {
-        return; //todo
+    public function getRequiredRole(): int {
+        return \KivWeb\Role::NONE;
     }
 
 }

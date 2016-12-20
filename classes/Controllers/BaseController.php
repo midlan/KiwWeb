@@ -8,11 +8,7 @@ abstract class BaseController {
     
     private $app;
     
-    /**
-     * 
-     * @return \KivWeb\App
-     */
-    final protected function getApp() {
+    final protected function getApp(): \KivWeb\App {
         return $this->app;
     }
     
@@ -20,6 +16,6 @@ abstract class BaseController {
         $this->app = $app;
     }
     
-    abstract public function getPermissionLevel();
+    abstract public function getRequiredRole(): int;
     
 }

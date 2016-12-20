@@ -16,6 +16,8 @@
         }
     },
     "pdo" : {
-        
+        "dsn": "mysql:host=localhost;dbname=hidden",
+        "username": "hidden",
+        "password": "hidden"
     }
 }

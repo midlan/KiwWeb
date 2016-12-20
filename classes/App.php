@@ -16,11 +16,7 @@ class App {
     private $twig = null;
     private $pdo = null;
     
-    /**
-     * 
-     * @return Router
-     */
-    public function getRouter() {
+    public function getRouter(): \KivWeb\Router {
         
         if($this->router === null) {
             
@@ -39,7 +35,7 @@ class App {
         return $this->router;
     }
     
-    public function getTwig() {
+    public function getTwig(): \Twig_Environment {
         
         if($this->twig === null) {
             
@@ -52,8 +48,11 @@ class App {
         return $this->twig;
     }
     
-    public function getPdo() {
-        //todo
+    public function getPDO(): \PDO {
+        
+        $conf = $this->config['PDO'];
+        
+        new PDO($conf['dsn'], $conf['username'], $conf['password'], []);
     }
     
     public function getUser() {

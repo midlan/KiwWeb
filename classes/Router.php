@@ -6,12 +6,6 @@ namespace KivWeb;
 
 class Router {
     
-    const ROUTE_KEY = 'p';
-    const ACTION_DELIMITER = '/';
-    const DEFAULT_CONTROLLER = 'Index';
-    const DEFAULT_METHOD = 'index';
-    const METHOD_SUFFIX = 'Action';
-    
     private $routeKey;
     private $routeDelimiter;
     private $defaultSection;
@@ -28,7 +22,7 @@ class Router {
         $this->controllersParent = $controllersParent;
     }
     
-    public function buildUrlPath(string $section, string $action, array $query = []) {
+    public function buildUrlPath(string $section, string $action, array $query = []): string {
         
         $route = $this->buildRoute($section, $action);
         
@@ -43,7 +37,7 @@ class Router {
         return '';
     }
     
-    public function buildRoute(string $section = '', string $action = '') {
+    public function buildRoute(string $section = '', string $action = ''): string {
         
         if($section === '' && $action !== '') {
             throw new Exception('Cannot build route with action and no section.');
@@ -70,7 +64,7 @@ class Router {
         return $section . $this->routeDelimiter . $action;
     }
     
-    public function parseRoute(string $route) {
+    public function parseRoute(string $route): array {
         
         $parts = explode($this->routeDelimiter, $route, 2);
         
@@ -84,7 +78,7 @@ class Router {
         return [$section, $action];
     }
     
-    public function getControllerClass(string $section = '') {
+    public function getControllerClass(string $section = ''): string {
         
         if($section === '') {
             $section = $this->defaultSection;
@@ -95,7 +89,7 @@ class Router {
         return "$this->controllersNamespace\\$section";
     }
     
-    public function getControllerMethod(string $action = '') {
+    public function getControllerMethod(string $action = ''): string {
         
         if($action === '') {
             $action = $this->defaultAction;
@@ -104,8 +98,8 @@ class Router {
         return $action . 'Action';
     }
     
-    public function getRoute(array $requestQuery) {
-        return array_key_exists(self::ROUTE_KEY, $requestQuery) && is_string($requestQuery[self::ROUTE_KEY]) ? $requestQuery[self::ROUTE_KEY] : '';
+    public function getRoute(array $requestQuery): string {
+        return array_key_exists($this->routeKey, $requestQuery) && is_string($requestQuery[$this->routeKey]) ? $requestQuery[$this->routeKey] : '';
     }
     
     //app zde slouží mimo jiné místo response (kódy 404 a 500)
