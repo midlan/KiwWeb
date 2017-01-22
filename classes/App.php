@@ -50,9 +50,14 @@ class App {
     
     public function getPDO(): \PDO {
         
-        $conf = $this->config['PDO'];
+        if($this->pdo === null) {
+            
+            $conf = $this->config['PDO'];
         
-        new PDO($conf['dsn'], $conf['username'], $conf['password'], []);
+            new PDO($conf['dsn'], $conf['username'], $conf['password'], []);
+        }
+        
+        return $this->pdo;
     }
     
     public function getUser() {
