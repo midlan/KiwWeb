@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace KivWeb\Controllers;
 
-class PostsDeciding extends BaseController {
+class PostsDecidingController extends PostsController {
     
     public function indexAction() {
         

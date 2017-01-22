@@ -22,7 +22,7 @@ class Router {
         $this->controllersParent = $controllersParent;
     }
     
-    public function buildUrlPath(string $section, string $action, array $query = []): string {
+    public function buildUrlPath(string $section = '', string $action = '', array $query = []): string {
         
         $route = $this->buildRoute($section, $action);
         
@@ -30,11 +30,13 @@ class Router {
             $query = [$this->routeKey => $route] + $query;
         }
         
+        $urlPath = './';
+        
         if($query) {
-            return '?' . http_build_query($query, '', '&', PHP_QUERY_RFC3986);
+            $urlPath .= '?' . http_build_query($query, '', '&', PHP_QUERY_RFC3986);
         }
         
-        return '';
+        return $urlPath;
     }
     
     public function buildRoute(string $section = '', string $action = ''): string {
@@ -86,7 +88,7 @@ class Router {
         
         $section[0] = \chr(\ord($section[0]) - 32); //zvětšit první písmeno, jen pokud bylo malé; todo co utf8?
         
-        return "$this->controllersNamespace\\$section";
+        return "{$this->controllersNamespace}\\{$section}Controller";
     }
     
     public function getControllerMethod(string $action = ''): string {
@@ -137,6 +139,7 @@ class Router {
         }
         
         //todo práva
+        //todo 403
         
         //inicializace a zavolání kontroleru
         $controller->init($app);

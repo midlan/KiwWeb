@@ -43,6 +43,9 @@ class App {
             
             $loader = new \Twig_Loader_Filesystem($conf['templates_dir']);
             $this->twig = new \Twig_Environment($loader, $conf['environment']);
+            
+            //definice globálních proměnných
+            $this->twig->addGlobal('router', $this->getRouter());
         }
         
         return $this->twig;

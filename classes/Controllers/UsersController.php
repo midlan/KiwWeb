@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace KivWeb\Controllers;
 
-class Users extends BaseController {
+class UsersController extends BaseController {
     
     public function indexAction() {
         
