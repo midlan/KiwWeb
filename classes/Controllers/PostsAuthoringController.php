@@ -35,7 +35,7 @@ class PostsAuthoringController extends PostsController {
     
 
     public function getRequiredRole(): int {
-        return \KivWeb\Role::AUTHOR;
+        return \KivWeb\Models\User::ROLE_AUTHOR;
     }
 
 }

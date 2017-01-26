@@ -43,7 +43,7 @@ class IndexController extends BaseController {
     }
 
     public function getRequiredRole(): int {
-        return \KivWeb\Role::NONE;
+        return \KivWeb\Models\User::ROLE_NONE;
     }
 
 }

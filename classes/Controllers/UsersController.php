@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace KivWeb\Controllers;
 
+use KivWeb\Models\User;
+
 class UsersController extends BaseController {
     
     public function indexAction() {
@@ -37,7 +39,7 @@ class UsersController extends BaseController {
     }
 
     public function getRequiredRole(): int {
-        return \KivWeb\Role::ADMIN;
+        return User::ROLE_ADMIN;
     }
 
 }

@@ -28,7 +28,7 @@ class PostsDecidingController extends PostsController {
     }
 
     public function getRequiredRole(): int {
-        return \KivWeb\Role::ADMIN;
+        return \KivWeb\Models\User::ROLE_ADMIN;
     }
 
 }

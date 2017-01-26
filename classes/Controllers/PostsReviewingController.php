@@ -32,7 +32,7 @@ class PostsReviewingController extends PostsController {
     }
 
     public function getRequiredRole(): int {
-        return \KivWeb\Role::REVIEWER;
+        return \KivWeb\Models\User::ROLE_REVIEWER;
     }
 
 }

@@ -14,9 +14,10 @@ class App {
     //services
     private $router = null;
     private $twig = null;
-    private $pdo = null;
+    private $conn = null;
+    private $user = null;
     
-    public function getRouter(): \KivWeb\Router {
+    public function getRouter(): Router {
         
         if($this->router === null) {
             
@@ -51,20 +52,46 @@ class App {
         return $this->twig;
     }
     
-    public function getPDO(): \PDO {
+    public function getConnection(): \PDO {
         
-        if($this->pdo === null) {
+        if($this->conn === null) {
             
-            $conf = $this->config['PDO'];
+            $conf = $this->config['pdo'];
         
-            new PDO($conf['dsn'], $conf['username'], $conf['password'], []);
+            $this->conn = new \PDO($conf['dsn'], $conf['username'], $conf['password'], []);
         }
         
-        return $this->pdo;
+        return $this->conn;
     }
     
-    public function getUser() {
+    private function saveSessionUserId() {
         
+        //uživatel nebyl použit => není co ukládat
+        if($this->user === null) {
+            return;
+        }
+        
+        $_SESSION['user_id'] = $this->user->getUserId();
+    }
+    
+    public function getUser(): Models\User {
+        
+        if($this->user === null) {
+            
+            $this->user = new Models\User($this->getConnection());
+            
+            if(session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+            
+            //načíst přihlášeného
+            if(array_key_exists('user_id', $_SESSION) && is_int($_SESSION['user_id'])) {
+                $this->user->loadById($_SESSION['user_id']);
+            }
+            
+        }
+        
+        return $this->user;
     }
 
     public function run(string $configFile) {
@@ -93,6 +120,9 @@ class App {
         
         //spustit kontroller
         $this->getRouter()->route($_GET, $this);
+        
+        //aktualizovat uživatele
+        $this->saveSessionUserId();
     }
     
     //todo 403
