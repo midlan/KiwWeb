@@ -10,6 +10,7 @@ abstract class BaseModel {
     private $conn;
     
     public function __construct(\PDO $conn) {
+        $this->clear();
         $this->conn = $conn;
     }
     
@@ -17,4 +18,5 @@ abstract class BaseModel {
         return $this->conn;
     }
 
+    abstract public function clear();
 }

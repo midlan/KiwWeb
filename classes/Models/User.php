@@ -12,14 +12,14 @@ class User extends BaseModel {
     const ROLE_REVIEWER = 0b010;
     const ROLE_ADMIN = 0b100;
     
-    private $userId = null;
-    private $role = null;
-    private $username = null;
-    private $passwordHash = null;
-    private $name = null;
-    private $email = null;
-    private $organization = null;
-    private $bannedDate = null;
+    private $userId ;
+    private $role ;
+    private $username ;
+    private $passwordHash ;
+    private $name ;
+    private $email ;
+    private $organization ;
+    private $bannedDate ;
 
     public function getUserId() {
         return $this->userId;
@@ -116,6 +116,9 @@ class User extends BaseModel {
     }
     
     private function fetchInto(array $data) {
+        
+        $this->clear();
+        
         $this->setUserId((int)$data['user_id']);
         $this->setRole((int)$data['role']);
         $this->setUsername($data['username']);
