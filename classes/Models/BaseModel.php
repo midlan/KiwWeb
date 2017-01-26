@@ -19,4 +19,6 @@ abstract class BaseModel {
     }
 
     abstract public function clear();
+    
+    abstract public function fetchInto();
 }

@@ -86,7 +86,12 @@ class User extends BaseModel {
     }
 
     public function setBannedDate(string $bannedDate) {
-        $this->bannedDate = $bannedDate;
+        if($bannedDate === '') {
+            $this->bannedDate = null;
+        }
+        else {
+            $this->bannedDate = $bannedDate;;
+        }
     }
 
     public function clearBannedDate() {
@@ -115,7 +120,7 @@ class User extends BaseModel {
         return $thisRole & $role === $role;
     }
     
-    private function fetchInto(array $data) {
+    public function fetchInto(array $data) {
         
         $this->clear();
         
