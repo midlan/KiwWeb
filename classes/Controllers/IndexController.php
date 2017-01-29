@@ -19,10 +19,25 @@ class IndexController extends BaseController {
     
     public function loginValidateAction() {
         
-        $twig = $this->getApp()->getTwig();
+        $app = $this->getApp();
         
-        //todo co s přihlášeným hňupem?
-        //todo user & password login
+        if(isset($_POST['username']) && isset($_POST['password'])) {
+            
+            $user = $app->getUser();
+            
+            if($user->loadByLogin((string)$_POST['username'], (string)$_POST['password'])) {
+                //todo add to message
+                'Přihlášení bylo úspěšné';
+            }
+            else {
+                //todo add to message
+                'Nesprávné jméno nebo heslo';
+            }
+            
+        }
+        
+        //přesměrování
+        header('Location: ' . $app->getRouter()->buildUrl('index', 'index'), true, 302);
     }
     
     public function registrationAction() {

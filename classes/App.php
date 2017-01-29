@@ -46,7 +46,7 @@ class App {
             $this->twig = new \Twig_Environment($loader, $conf['environment']);
             
             //definice globálních proměnných
-            $this->twig->addGlobal('router', $this->getRouter());
+            $this->twig->addGlobal('app', $this);
         }
         
         return $this->twig;
@@ -78,7 +78,7 @@ class App {
         
         if($this->user === null) {
             
-            $this->user = new Models\User($this->getConnection());
+            $this->user = new Models\User($this);
             
             if(session_status() === PHP_SESSION_NONE) {
                 session_start();

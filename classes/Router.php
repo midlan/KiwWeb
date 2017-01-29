@@ -22,7 +22,16 @@ class Router {
         $this->controllersParent = $controllersParent;
     }
     
-    public function buildUrlPath(string $section = '', string $action = '', array $query = []): string {
+    public function buildUrl(string $section = '', string $action = '', array $query = []): string {
+        
+        $path = $this->buildPath($section, $action, $query);
+        
+        $pathAbs = preg_replace('~^\\./~', '', $path); //cut ./ from beggining
+        
+        return "http://{$_SERVER['HTTP_HOST']}/{$pathAbs}";
+    }
+    
+    public function buildPath(string $section = '', string $action = '', array $query = []): string {
         
         $route = $this->buildRoute($section, $action);
         
@@ -122,6 +131,7 @@ class Router {
         }
         
         //instance
+        /* @var $controller \KivWeb\Controllers\BaseController */
         $controller = new $class;
         
         //kontrola platnosti kontroleru
@@ -138,8 +148,10 @@ class Router {
             return;
         }
         
-        //todo práva
-        //todo 403
+        //kontrola práv uživatele
+        if(!$app->getUser()->isAllowedTo($controller->getRequiredRole())) {
+            //todo 403
+        }
         
         //inicializace a zavolání kontroleru
         $controller->init($app);

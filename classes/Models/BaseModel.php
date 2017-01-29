@@ -7,15 +7,15 @@ namespace KivWeb\Models;
 
 abstract class BaseModel {
     
-    private $conn;
+    private $app;
     
-    public function __construct(\PDO $conn) {
+    public function __construct(\KivWeb\App $app) {
         $this->clear();
-        $this->conn = $conn;
+        $this->app = $app;
     }
     
     public function getConnection(): \PDO {
-        return $this->conn;
+        return $this->app->getConnection();
     }
 
     abstract public function clear();

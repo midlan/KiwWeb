@@ -28,15 +28,15 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="{{ router.buildUrlPath() }}">KivWeb</a>
+          <a class="navbar-brand" href="{{ app.getRouter().buildPath() }}">KivWeb</a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
-          <form class="navbar-form navbar-right">
+            <form class="navbar-form navbar-right" action="{{ app.getRouter().buildPath('index', 'loginValidate') }}" method="post">
             <div class="form-group">
-              <input type="text" placeholder="Uživatel" class="form-control">
+                <input type="text" name="username" placeholder="Uživatel" class="form-control">
             </div>
             <div class="form-group">
-              <input type="password" placeholder="Heslo" class="form-control">
+                <input type="password" name="password" placeholder="Heslo" class="form-control">
             </div>
             <button type="submit" class="btn btn-success">Přihlásit</button>
           </form>

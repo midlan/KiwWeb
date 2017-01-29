@@ -139,6 +139,8 @@ class User extends BaseModel {
     
     public function loadById(int $userId): bool {
         
+        $this->clear();
+        
         $stmt =  $this->getConnection()->prepare('SELECT * FROM users WHERE user_id = :user_id LIMIT 1;');
         
         $stmt->bindParam(':user_id', $userId);
@@ -156,6 +158,8 @@ class User extends BaseModel {
     }
     
     public function loadByLogin(string $username, string $password): bool {
+        
+        $this->clear();
         
         $stmt = $this->getConnection()->prepare('SELECT * FROM users WHERE username = :username LIMIT 1;');
         
