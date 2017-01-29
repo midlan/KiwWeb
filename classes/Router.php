@@ -113,7 +113,6 @@ class Router {
         return array_key_exists($this->routeKey, $requestQuery) && is_string($requestQuery[$this->routeKey]) ? $requestQuery[$this->routeKey] : '';
     }
     
-    //app zde slouží mimo jiné místo response (kódy 404 a 500)
     public function route(array $requestQuery, App $app) {
         
         $route = $this->getRoute($requestQuery);
@@ -126,7 +125,7 @@ class Router {
         
         //kontrola existence třídy kontroleru
         if(!class_exists($class)) {
-            $this->response404("Class $class not found");
+            $app->errorResponse(404, "Class $class not found");
             return;
         }
         
@@ -138,13 +137,13 @@ class Router {
         $parentClass = $this->controllersNamespace . '\\' . $this->controllersParent;
         
         if(!($controller instanceof $parentClass)) {
-            $app->response500("$class is not child of $parentClass");
+            $app->errorResponse(500, "$class is not child of $parentClass");
             return;
         }
             
         //kontrola cílové metody
         if(!is_callable([$controller, $method])) {
-            $this->response404("Method $class::$method is not callable");
+            $app->errorResponse(404, "Method $class::$method is not callable");
             return;
         }
         

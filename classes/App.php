@@ -125,29 +125,17 @@ class App {
         $this->saveSessionUserId();
     }
     
-    //todo 403
-    
-    public function response404(string $reason = '') {
+    public function errorResponse(int $code, string $reason = '') {
         
         //log reason
         if($reason !== '') {
-            Debugger::log("HTTP 404 reason: $reason", LogLevel::INFO);
-            Debugger::fireLog("HTTP 404 reason: $reason");
+            Debugger::log("HTTP $code reason: $reason", LogLevel::INFO);
+            Debugger::fireLog("HTTP $code reason: $reason");
         }
         
-        header("{$_SERVER['SERVER_PROTOCOL']} 404 Not Found", true, 404);
-        echo 404; //todo body
+        //todo error 500 házel 502, zkontrolovat
+        http_response_code($code);
+        echo $code;
     }
     
-    public function response500(string $reason = '') {
-        
-        //log reason
-        if($reason !== '') {
-            Debugger::log("HTTP 500 reason: $reason", LogLevel::CRITICAL);
-            Debugger::fireLog("HTTP 500 reason: $reason");
-        }
-        
-//        header("{$_SERVER['SERVER_PROTOCOL']} Internal Server Error", true, 500); //todo fixit, makes 502
-        echo 500; //todo body
-    }
 }
