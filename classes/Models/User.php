@@ -228,8 +228,16 @@ class User extends BaseModel {
         $stmt->bindParam(':role', $role);
         $stmt->execute();
         
-        $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $users = array();
         
-        return $data === false ? array() : $data;
+        while(($row = $stmt->fetch(\PDO::FETCH_ASSOC)) !== false) {
+            
+            $user = new self;
+            $user->fetchInto($row);
+            
+            $users[] = $user;
+        }
+        
+        return $users;
     }
 }

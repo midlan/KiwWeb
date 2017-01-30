@@ -30,7 +30,28 @@ class PostsAuthoringController extends PostsController {
     
     public function deleteAction() {
         
-        //todo delete
+        $app = $this->getApp();
+        
+        if(isset($_POST['post_id'])) {
+            
+            $post = new \KivWeb\Models\Post;
+            
+            $post->loadById((int)$_POST['post_id']);
+            
+            //smazání příspěvku
+            if($post->delete()) {
+                //todo add to message
+                'Smazání příspěvku bylo úspěšné';
+            }
+            else {
+                //todo add to message
+                'Smazání příspěvku se nezdařilo';
+            }
+            
+        }
+        
+        //přesměrování
+        header('Location: ' . $app->getRouter()->buildUrl('postsAuthoring'), true, 302);
     }
     
 

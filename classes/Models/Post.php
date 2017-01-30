@@ -88,6 +88,8 @@ class Post extends BaseModel {
     
     public function loadById(int $postId): bool {
         
+        $this->clear();
+        
         $stmt =  $this->getConnection()->prepare('SELECT * FROM posts WHERE post_id = :post_id LIMIT 1;');
         
         $stmt->bindParam(':post_id', $postId);
@@ -143,4 +145,42 @@ class Post extends BaseModel {
         
         return $success;
     }
+    
+    public function delete(): bool {
+        
+        $stmt =  $this->getConnection()->prepare('DELETE FROM posts WHERE post_id = :post_id LIMIT 1;');
+        
+        $stmt->bindParam(':post_id', $this->getPostId());
+        return $stmt->execute();
+        
+    }
+    
+    private static function getArrayByStmt(\PDOStatement $stmt): array {
+        
+        $posts = array();
+        
+        while(($row = $stmt->fetch(\PDO::FETCH_ASSOC)) !== false) {
+            
+            $post = new self;
+            $post->fetchInto($row);
+            
+            $posts[] = $post;
+        }
+        
+        return $posts;
+    }
+
+    public static function getArrayByAuthorId(\PDO $conn, int $userId): array {
+        
+        $stmt = $conn->prepare('SELECT * FROM posts WHERE user_id = :user_id;');
+        
+        $stmt->bindParam(':user_id', $userId);
+        $stmt->execute();
+        
+        return $this->getArrayByStmt($stmt);
+    }
+    
+    //todo getArrayByReviewerId
+    
+    //todo getArrayToDecide
 }

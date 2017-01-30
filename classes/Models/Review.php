@@ -116,6 +116,8 @@ class Review extends BaseModel {
     
     public function loadById(int $reviewId): bool {
         
+        $this->clear();
+        
         $stmt =  $this->getConnection()->prepare('SELECT * FROM reviews WHERE review_id = :review_id LIMIT 1;');
         
         $stmt->bindParam(':review_id', $reviewId);

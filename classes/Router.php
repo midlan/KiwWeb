@@ -149,7 +149,8 @@ class Router {
         
         //kontrola práv uživatele
         if(!$app->getUser()->isAllowedTo($controller->getRequiredRole())) {
-            //todo 403
+            $app->errorResponse(403, "Missing user role to access $class");
+            return;
         }
         
         //inicializace a zavolání kontroleru

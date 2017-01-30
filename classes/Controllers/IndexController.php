@@ -25,6 +25,7 @@ class IndexController extends BaseController {
             
             $user = $app->getUser();
             
+            //zkusit přihlásit
             if($user->loadByLogin((string)$_POST['username'], (string)$_POST['password'])) {
                 //todo add to message
                 'Přihlášení bylo úspěšné';
@@ -37,7 +38,7 @@ class IndexController extends BaseController {
         }
         
         //přesměrování
-        header('Location: ' . $app->getRouter()->buildUrl('index', 'index'), true, 302);
+        header('Location: ' . $app->getRouter()->buildUrl('index'), true, 302);
     }
     
     public function registrationAction() {
