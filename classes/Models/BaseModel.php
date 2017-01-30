@@ -20,5 +20,5 @@ abstract class BaseModel {
 
     abstract public function clear();
     
-    abstract public function fetchInto();
+    abstract public function fetchInto(array $data);
 }

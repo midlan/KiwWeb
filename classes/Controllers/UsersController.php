@@ -6,7 +6,7 @@ namespace KivWeb\Controllers;
 
 use KivWeb\Models\User;
 
-class UsersController extends BaseController {
+class UsersManageController extends BaseController {
     
     public function indexAction() {
         

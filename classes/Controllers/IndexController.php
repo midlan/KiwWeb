@@ -10,7 +10,8 @@ class IndexController extends BaseController {
         
         $twig = $this->getApp()->getTwig();
         
-        $template = $twig->load('skeleton.twig');
+//        $template = $twig->load('skeleton.twig');
+        $template = $twig->load('index.twig');
         
         echo $template->render(array('a_variable' => 'Hello world!'));
         
@@ -27,15 +28,27 @@ class IndexController extends BaseController {
             
             //zkusit přihlásit
             if($user->loadByLogin((string)$_POST['username'], (string)$_POST['password'])) {
-                //todo add to message
-                'Přihlášení bylo úspěšné';
+                $app->addMessage(\KivWeb\App::MESSAGE_SUCCESS, 'Přihlášení bylo úspěšné.');
             }
             else {
-                //todo add to message
-                'Nesprávné jméno nebo heslo';
+                $app->addMessage(\KivWeb\App::MESSAGE_ERROR, 'Nesprávné jméno nebo heslo.');
             }
             
         }
+        
+        //přesměrování
+        header('Location: ' . $app->getRouter()->buildUrl('index'), true, 302);
+    }
+    
+    public function logoutAction() {
+        
+        $app = $this->getApp();
+        
+        $user = $app->getUser();
+
+        $user->clear();
+
+        $app->addMessage(\KivWeb\App::MESSAGE_SUCCESS, 'Odhlášení bylo úspěšné.');
         
         //přesměrování
         header('Location: ' . $app->getRouter()->buildUrl('index'), true, 302);

@@ -100,7 +100,7 @@ class User extends BaseModel {
     
     public function clear() {
         $this->userId = null;
-        $this->role = null;
+        $this->role = self::ROLE_NONE;
         $this->username = null;
         $this->passwordHash = null;
         $this->name = null;
@@ -113,11 +113,7 @@ class User extends BaseModel {
         
         $thisRole = $this->getRole();
         
-        if($thisRole === null) {
-            return false; 
-        }
-        
-        return $thisRole & $role === $role;
+        return ($thisRole & $role) === $role;
     }
     
     public function fetchInto(array $data) {
@@ -135,6 +131,10 @@ class User extends BaseModel {
         if($data['banned_date'] !== null) {
             $this->setBannedDate($data['banned_date']);
         }
+    }
+    
+    public function isLoaded(): bool {
+        return $this->getUserId() !== null;
     }
     
     public function loadById(int $userId): bool {

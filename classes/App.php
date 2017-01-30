@@ -9,6 +9,11 @@ use \Tracy\Debugger,
 
 class App {
     
+    const MESSAGE_SUCCESS = 'success';
+    const MESSAGE_INFO = 'info';
+    const MESSAGE_WARNING = 'warning';
+    const MESSAGE_ERROR = 'danger';
+    
     private $config;
     
     //services
@@ -93,6 +98,42 @@ class App {
         }
         
         return $this->user;
+    }
+    
+    public function addMessage(string $type, string $message) {
+        
+        if(session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        
+        $messageItem = array(
+            'type' => $type,
+            'text' => $message,
+        );
+        
+        //pole zpráv v session už existuje, přidat zprávu
+        if(array_key_exists('messages', $_SESSION) && is_array($_SESSION['messages'])) {
+            $_SESSION['messages'][] = $messageItem;
+        }
+        //založit pole
+        else {
+            $_SESSION['messages'] = array($messageItem);
+        }
+    }
+    
+    public function getCleanMessages(): array {
+        
+        if(session_status() === PHP_SESSION_NONE) {
+            return array();
+        }
+        
+        if(array_key_exists('messages', $_SESSION) && is_array($_SESSION['messages'])) {
+            $messages = $_SESSION['messages'];
+            $_SESSION['messages'] = array(); //clean
+            return $messages;
+        }
+        
+        return array();
     }
 
     public function run(string $configFile) {

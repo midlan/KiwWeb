@@ -40,12 +40,10 @@ class PostsAuthoringController extends PostsController {
             
             //smazání příspěvku
             if($post->delete()) {
-                //todo add to message
-                'Smazání příspěvku bylo úspěšné';
+                $app->addMessage('Smazání příspěvku bylo úspěšné');
             }
             else {
-                //todo add to message
-                'Smazání příspěvku se nezdařilo';
+                $app->addMessage('Smazání příspěvku se nezdařilo');
             }
             
         }
