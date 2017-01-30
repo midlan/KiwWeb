@@ -1,5 +1,7 @@
 <?php
 
+use \KivWeb\App;
+
 declare(strict_types=1);
 
 namespace KivWeb\Controllers;
@@ -28,10 +30,10 @@ class IndexController extends BaseController {
             
             //zkusit přihlásit
             if($user->loadByLogin((string)$_POST['username'], (string)$_POST['password'])) {
-                $app->addMessage(\KivWeb\App::MESSAGE_SUCCESS, 'Přihlášení bylo úspěšné.');
+                $app->addMessage(App::MESSAGE_SUCCESS, 'Přihlášení bylo úspěšné.');
             }
             else {
-                $app->addMessage(\KivWeb\App::MESSAGE_ERROR, 'Nesprávné jméno nebo heslo.');
+                $app->addMessage(App::MESSAGE_ERROR, 'Nesprávné jméno nebo heslo.');
             }
             
         }
@@ -48,7 +50,7 @@ class IndexController extends BaseController {
 
         $user->clear();
 
-        $app->addMessage(\KivWeb\App::MESSAGE_SUCCESS, 'Odhlášení bylo úspěšné.');
+        $app->addMessage(App::MESSAGE_SUCCESS, 'Odhlášení bylo úspěšné.');
         
         //přesměrování
         header('Location: ' . $app->getRouter()->buildUrl('index'), true, 302);

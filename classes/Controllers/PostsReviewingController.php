@@ -1,5 +1,9 @@
 <?php
 
+use \KivWeb\App,
+    \KivWeb\Models\Post,
+    \KivWeb\Models\Review;
+
 declare(strict_types=1);
 
 namespace KivWeb\Controllers;
@@ -8,27 +12,142 @@ class PostsReviewingController extends PostsController {
     
     public function indexAction() {
         
-        $twig = $this->getApp()->getTwig();
+        $app = $this->getApp();
+        $conn = $app->getConnection();
+        $user = $app->getUser();
         
-        //todo list of my posts assigned to me to review
-        //show only undecided
+        $posts = Post::getArrayToReviewBy($conn, $user->getUserId());
+        $reviews = Review::getArrayByAuthor($conn, $user->getUserId());
+        
+        $twig = $app->getTwig();
     }
     
     public function addAction() {
+        
+        $twig = $app->getTwig();
         
         //todo formulář na přidání recenze
     }
     
     public function editAction() {
         
-        //todo edit of post
-        //lze editovat jen undecided recenzi
+        $app = $this->getApp();
+        
+        if(isset($_GET['post_id']) && isset($_GET['review_id'])) {
+            header('Location: ' . $app->getRouter()->buildUrl('postsReviewing'), true, 302);
+            return;
+        }
+        
+        $review = new Review($app);
+        $review->loadById($_GET['review_id']);
+        
+        if(!$review->isLoaded()) {
+            $app->addMessage(App::MESSAGE_ERROR, 'Hodnocení které se pokoušíte upravit neexistuje.');
+            header('Location: ' . $app->getRouter()->buildUrl('postsReviewing'), true, 302);
+            return;
+        }
+            
+        $post = new Post($app);
+        $post->loadById((int)$_GET['post_id']);
+
+        if(!$post->isLoaded()) {
+            $app->addMessage(App::MESSAGE_ERROR, 'Přípěvek, který se pokoušíte hodnotit neexistuje.');
+            header('Location: ' . $app->getRouter()->buildUrl('postsReviewing'), true, 302);
+            return;
+        }
+
+        if(!$post->isAllowedToReviewBy($app->getUser()->getUserId())) {
+            $app->addMessage(App::MESSAGE_ERROR, 'Přípěvek, který se pokoušíte hodnotit Vám nebyl k hodnocení přidělen.');
+            header('Location: ' . $app->getRouter()->buildUrl('postsReviewing'), true, 302);
+            return;
+        }
+        
+        $twig = $app->getTwig();
+
+        //todo render
+        //todo assign $post
     }
     
     public function saveAction() {
         
-        //todo uložení recenze
-        //lze editovat jen undecided recenzi
+        $app = $this->getApp();
+        $user = $app->getUser();
+        
+        if(
+            isset($_POST['review_id']) xor isset($_POST['post_id'])
+            && isset($_POST['originality'])
+            && isset($_POST['gramar'])
+            && isset($_POST['topic'])
+            && isset($_POST['note'])
+        ) {
+            header('Location: ' . $app->getRouter()->buildUrl('postsReviewing'), true, 302);
+            return;
+        }
+            
+        $review = new Review($app);
+        $post = new Post($app);
+        
+        //editace hodnocení
+        if(isset($_POST['review_id'])) {
+            
+            $review->loadById((int)$_POST['review_id']);
+            
+            if(!$review->isLoaded()) {
+                $app->addMessage(App::MESSAGE_ERROR, 'Hodnocení, které se pokoušíte upravit neexistuje.');
+                header('Location: ' . $app->getRouter()->buildUrl('postsReviewing'), true, 302);
+                return;
+            }
+            
+            $post->loadById($review->getPostId());
+        }
+        //nové hodnocení
+        else {
+            $post->loadById((int)$_POST['post_id']);
+        }
+        
+        if(!$post->isLoaded()) {
+            $app->addMessage(App::MESSAGE_ERROR, 'Přípěvek, který se pokoušíte hodnotit neexistuje.');
+            header('Location: ' . $app->getRouter()->buildUrl('postsReviewing'), true, 302);
+            return;
+        }
+        
+        if(!$post->isAllowedToReviewBy($user->getUserId())) {
+            $app->addMessage(App::MESSAGE_ERROR, 'Přípěvek, který se pokoušíte hodnotit Vám nebyl k hodnocení přidělen nebo už bylo rozhodnuto o jeho zveřejnění.');
+            header('Location: ' . $app->getRouter()->buildUrl('postsReviewing'), true, 302);
+            return;
+        }
+        
+        //nastavení dat
+        $review->fetchInto(array_merge(array(
+            'user_id' => $user->getUserId(),
+            'review_date' => date('Y-m-d H:i:s'),
+        ), $_POST));
+
+        //uložení
+        if($review->save()) {
+            $app->addMessage(App::MESSAGE_SUCCESS, 'Hodnocení bylo uloženo.');
+        }
+        else {
+            $app->addMessage(App::MESSAGE_ERROR, 'Hodnocení se nepodařilo uložit.');
+        }
+        
+        header('Location: ' . $app->getRouter()->buildUrl('postsReviewing'), true, 302);
+    }
+    
+    public function downloadAction() {
+        
+        $post = $this->getDownloadingPost();
+        
+        if(!$post->isLoaded()) {
+            return; //headers generated by getDownloadingPost
+        }
+        
+        if($post->isAllowedToReviewBy($this->getApp()->getUser()->getUserId())) {
+            $app->errorResponse(403, 'Trying to access post not assigned to review.');
+            return;
+        }
+
+        $this->outputPdf($post);
     }
 
     public function getRequiredRole(): int {

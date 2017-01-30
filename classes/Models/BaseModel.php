@@ -14,11 +14,13 @@ abstract class BaseModel {
         $this->app = $app;
     }
     
-    public function getConnection(): \PDO {
+    protected function getConnection(): \PDO {
         return $this->app->getConnection();
     }
 
     abstract public function clear();
     
     abstract public function fetchInto(array $data);
+    
+    abstract public function isLoaded(): bool;
 }

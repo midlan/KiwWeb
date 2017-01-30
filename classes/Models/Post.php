@@ -7,6 +7,8 @@ namespace KivWeb\Models;
 
 class Post extends BaseModel {
     
+    const MIN_REVIEWS_FOR_APPROVE = 3;
+    
     private $postId;
     private $userId; 
     private $title;
@@ -86,6 +88,39 @@ class Post extends BaseModel {
         }
     }
     
+    public function canBeApproved(): bool {
+        throw new Exception('not implented yet');
+        //todo select at least 3 reviews
+        self::MIN_REVIEWS_FOR_APPROVE;
+    }
+    
+    public function assignToReviewBy(int $userId): bool {
+        throw new Exception('not implented yet');
+        
+        if($this->getApproved() === null) {
+            //todo insert reviewers_assign
+        
+            //todo on duplicate key ignore
+        }
+        
+        
+    }
+    
+    public function isAllowedToReviewBy(int $userId): bool {
+        throw new Exception('not implented yet');
+        
+        //rozhodnuté příspěvky už nelze hodnotit
+        if($this->getApproved() !== null) {
+            return false;
+        }
+        
+        //todo select from reviewers_assign
+    }
+    
+    public function isLoaded(): bool {
+        return $this->getPostId() !== null;
+    }
+    
     public function loadById(int $postId): bool {
         
         $this->clear();
@@ -108,7 +143,7 @@ class Post extends BaseModel {
     
     public function save(): bool {
         
-        $new = $this->getReviewId() === null;
+        $new = !$this->isLoaded();
         
         $query = $new ? 'INSERT INTO' : 'UPDATE';
         
@@ -140,13 +175,17 @@ class Post extends BaseModel {
         ));
         
         if($success && $new) {
-            $this->setReviewDate((int)$conn->lastInsertId());
+            $this->setPostId((int)$conn->lastInsertId());
         }
         
         return $success;
     }
     
     public function delete(): bool {
+        
+        if($this->isLoaded()) {
+            return false;
+        }
         
         $stmt =  $this->getConnection()->prepare('DELETE FROM posts WHERE post_id = :post_id LIMIT 1;');
         
@@ -155,7 +194,7 @@ class Post extends BaseModel {
         
     }
     
-    private static function getArrayByStmt(\PDOStatement $stmt): array {
+    private static function stmtToObjectArray(\PDOStatement $stmt): array {
         
         $posts = array();
         
@@ -177,10 +216,17 @@ class Post extends BaseModel {
         $stmt->bindParam(':user_id', $userId);
         $stmt->execute();
         
-        return $this->getArrayByStmt($stmt);
+        return self::stmtToObjectArray($stmt);
     }
     
-    //todo getArrayByReviewerId
+    public static function getArrayToReviewBy(\PDO $conn, int $userId): array {
+        throw new Exception('not implented yet');
+        //todo is assigned to user
+        //todo approved IS NULL
+    }
     
-    //todo getArrayToDecide
+    public static function getArrayToAssign(\PDO $conn): array {
+        throw new Exception('not implented yet');
+        //todo approved IS NULL
+    }
 }

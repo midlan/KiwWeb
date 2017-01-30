@@ -123,7 +123,14 @@ class User extends BaseModel {
         $this->setUserId((int)$data['user_id']);
         $this->setRole((int)$data['role']);
         $this->setUsername($data['username']);
-        $this->setPasswordHash($data['password_hash']);
+        
+        if(array_key_exists('password_hash', $data)) {
+            $this->setPasswordHash($data['password_hash']);
+        }
+        else {
+            $this->setPassword($data['password']);
+        }
+        
         $this->setName($data['name']);
         $this->setEmail($data['email']);
         $this->setOrganization($data['organization']);
@@ -179,7 +186,7 @@ class User extends BaseModel {
     
     public function save(): bool {
         
-        $new = $this->getUserId() === null;
+        $new = !$this->isLoaded();
         
         $query = $new ? 'INSERT INTO' : 'UPDATE';
         

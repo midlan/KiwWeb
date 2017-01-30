@@ -114,6 +114,10 @@ class Review extends BaseModel {
         }
     }
     
+    public function isLoaded(): bool {
+        return $this->getReviewId() !== null;
+    }
+    
     public function loadById(int $reviewId): bool {
         
         $this->clear();
@@ -136,7 +140,7 @@ class Review extends BaseModel {
     
     public function save(): bool {
         
-        $new = $this->getReviewId() === null;
+        $new = !$this->isLoaded();
         
         $query = $new ? 'INSERT INTO' : 'UPDATE';
         
@@ -176,5 +180,9 @@ class Review extends BaseModel {
         }
         
         return $success;
+    }
+    
+    public static function getArrayByAuthor(\PDO $conn, int $userId): array {
+        throw new Exception('not implented yet');
     }
 }
