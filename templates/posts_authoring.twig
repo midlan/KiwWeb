@@ -26,16 +26,10 @@
                     <th>{% if post.getApproved() is null %}Nerozhodnuto{% elseif post.getApproved() %}Schváleno{% else %}Zamítnuto{% endif %}</th>
                     <td>
                         <a href="{{ router.buildPath('postsAuthoring', 'download', {"post_id": post.getPostId()}) }}" class="btn btn-primary"><span class="glyphicon glyphicon-download"></span> Stáhnout PDF</a>
-                        <form style="display: inline-block;" method="post" action="{{ router.buildPath('postsDeciding', 'decide') }}">
-                            <input type="hidden" name="decision" value="no" >
-                            <button class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span> Schválit</button>
-                        </form>
-                    </td>
-                    <td>
-                        <a href="{{ router.buildPath('postsAuthoring', 'download', {"post_id": post.getPostId()}) }}" class="btn btn-primary"><span class="glyphicon glyphicon-download"></span> Stáhnout PDF</a>
-                        <form style="display: inline-block;" method="post" action="{{ router.buildPath('postsDeciding', 'decide') }}">
-                            <input type="hidden" name="decision" value="no" >
-                            <button class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span> Zamítnout</button>
+                        <a href="{{ router.buildPath('postsAuthoring', 'edit', {"post_id": post.getPostId()}) }}" class="btn btn-info"><span class="glyphicon glyphicon-edit"></span> Upravit</a>
+                        <form style="display: inline-block;" method="post" action="{{ router.buildPath('postsAuthoring', 'delete') }}">
+                            <input type="hidden" name="post_id" value="{{ post.getPostId() }}" >
+                            <button class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span> Smazat</button>
                         </form>
                     </td>
                 </tr>
