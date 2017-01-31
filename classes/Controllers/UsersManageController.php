@@ -95,6 +95,8 @@ class UsersManageController extends BaseController {
     
     public function saveAction() {
         
+        $app = $this->getApp();
+        
         if(
             isset($_POST['user_id'])
             && isset($_POST['username'])

@@ -3,5 +3,67 @@
 {% block title %}Editace uživatele{% endblock %}
 
 {% block content %}
-    todo
+    <form class="form-horizontal" method="post" action="{{ router.buildPath('usersManage', 'save') }}">
+        <fieldset>
+
+            <input type="hidden" name="user_id" value="{{ managedUser.getUserId() }}">
+            
+            <legend>Registrace</legend>
+            
+            <div class="form-group">
+                <label class="col-md-4 control-label" >Email</label>  
+                <div class="col-md-4">
+                    <input name="email" type="email" value="{{ managedUser.getEmail() }}" class="form-control input-md" required="">
+
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="col-md-4 control-label" >Přezdívka</label>  
+                <div class="col-md-4">
+                    <input name="username" type="text" value="{{ managedUser.getUsername() }}" class="form-control input-md" required="">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-md-4 control-label" >Nové heslo</label>
+                <div class="col-md-4">
+                    <input name="new_password" type="password" class="form-control input-md">
+                </div>
+            </div>
+                
+            <div class="form-group">
+                <label class="col-md-4 control-label" >Role</label>
+                <div class="col-md-4">
+                    <div class="checkbox"><label><input name="role_author" type="checkbox"{% if managedUser.isAllowedTo(constant('\\KivWeb\\Models\\User::ROLE_AUTHOR')) %} checked=""{% endif %}>Autor</label></div>
+                    <div class="checkbox"><label><input name="role_reviewer" type="checkbox"{% if managedUser.isAllowedTo(constant('\\KivWeb\\Models\\User::ROLE_REVIEWER')) %} checked=""{% endif %}>Recenzent</label></div>
+                    <div class="checkbox"><label><input name="role_admin" type="checkbox"{% if managedUser.isAllowedTo(constant('\\KivWeb\\Models\\User::ROLE_ADMIN')) %} checked=""{% endif %}>Admin</label></div>
+                </div>
+                
+            </div>
+            
+            <div class="form-group">
+                <label class="col-md-4 control-label" >Jméno</label>  
+                <div class="col-md-4">
+                    <input name="name" type="text" value="{{ managedUser.getName() }}" class="form-control input-md" required="">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="col-md-4 control-label" >Organizace</label>  
+                <div class="col-md-4">
+                    <input name="organization" type="text" value="{{ managedUser.getOrganization() }}" class="form-control input-md" required="">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-md-4 control-label" ></label>
+                <div class="col-md-4">
+                    <button class="btn btn-success">Uložit</button>
+                </div>
+            </div>
+
+        </fieldset>
+    </form>
+
 {% endblock %}

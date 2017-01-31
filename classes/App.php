@@ -96,6 +96,11 @@ class App {
                 $this->user->loadById($_SESSION['user_id']);
             }
             
+            //zablokovaný účet
+            if($this->user->getBannedDate() !== null) {
+                $this->user->clear();
+                $this->addMessage(App::MESSAGE_ERROR, 'Zablokovaný uživatelský účet');
+            }
         }
         
         return $this->user;

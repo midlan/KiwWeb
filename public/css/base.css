@@ -2,3 +2,8 @@
 body {
   padding-top: 70px;
 }
+
+input:required, textarea:required {
+    border-color: #c99;
+    border-width: 2px;
+}

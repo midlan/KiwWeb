@@ -284,7 +284,7 @@ class User extends BaseModel {
     
     public function delete(): bool {
         
-        if($this->isLoaded()) {
+        if(!$this->isLoaded()) {
             return false;
         }
         

@@ -3,5 +3,44 @@
 {% block title %}Správa uživatelů{% endblock %}
 
 {% block content %}
-    todo
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Přezdívka</th>
+                <th>Email</th>
+                <th>Role<br>(autor recenzent admin)</th>
+                <th>Jméno</th>
+                <th>Organizace</th>
+                <th>Zablokovaný</th>
+                <th>Akce</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+                <tr>
+                    <td>{{ user.getUsername() }}</td>
+                    <td>{{ user.getEmail() }}</td>
+                    <td>
+                        {% if user.isAllowedTo(constant('\\KivWeb\\Models\\User::ROLE_AUTHOR')) %}ano{% else %}ne{% endif %}
+                        {% if user.isAllowedTo(constant('\\KivWeb\\Models\\User::ROLE_REVIEWER')) %}ano{% else %}ne{% endif %}
+                        {% if user.isAllowedTo(constant('\\KivWeb\\Models\\User::ROLE_ADMIN')) %}ano{% else %}ne{% endif %}
+                    </td>
+                    <td>{{ user.getName() }}</td>
+                    <td>{{ user.getOrganization() }}</td>
+                    <td>{{ user.getBannedDate() }}</td>
+                    <td>
+                        <a href="{{ router.buildPath('usersManage', 'edit', {"user_id": user.getUserId()}) }}" class="btn btn-primary"><span class="glyphicon glyphicon-edit"></span> Editovat</a>
+                        <form style="display: inline-block;" method="post" action="{{ router.buildPath('usersManage', 'ban') }}">
+                            <input type="hidden" name="user_id" value="{{ user.getUserId() }}" >
+                            <button class="btn btn-warning"><span class="glyphicon glyphicon-minus-sign"></span> Zablokovat</button>
+                        </form>
+                            <form style="display: inline-block;" method="post" action="{{ router.buildPath('usersManage', 'delete') }}">
+                            <input type="hidden" name="user_id" value="{{ user.getUserId() }}" >
+                            <button class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span> Smazat</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 {% endblock %}
