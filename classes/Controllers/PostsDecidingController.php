@@ -13,13 +13,12 @@ class PostsDecidingController extends PostsController {
     public function indexAction() {
         
         $app = $this->getApp();
-        $conn = $app->getConnection();
         $twig = $app->getTwig();
         
-        $posts = Post::getArrayToAssign($conn);
-        $reviewers = User::getArrayByRole($conn, User::ROLE_REVIEWER);
+        $posts = Post::getArrayToAssign($app);
+        $reviewers = User::getArrayByRole($app, User::ROLE_REVIEWER);
         
-        $template = $twig->load('posts_decide.twig');
+        $template = $twig->load('posts_deciding.twig');
         
         echo $template->render(array(
             'posts' => $posts,
@@ -35,7 +34,7 @@ class PostsDecidingController extends PostsController {
             
             $post = new Post($app);
             
-            $post->loadById($_GET['post_id']);
+            $post->loadById((int)$_GET['post_id']);
 
             if($post->isLoaded() && $post->assignToReviewBy($_POST['reviewer_id'])) {
                 $app->addMessage(App::MESSAGE_SUCCESS, 'Příspěvek byl přidělen recenzentovi.');

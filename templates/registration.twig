@@ -1,0 +1,64 @@
+{% extends "skeleton.twig" %}
+
+{% block title %}Registrace{% endblock %}
+
+{% block content %}
+    <form class="form-horizontal" method="post" action="{{ router.buildPath('index', 'registrationValidate') }}">
+        <fieldset>
+
+            <legend>Registrace</legend>
+            
+            <div class="form-group">
+                <label class="col-md-4 control-label" for="email">Email</label>  
+                <div class="col-md-4">
+                    <input name="email" type="text" class="form-control input-md" required="">
+
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="col-md-4 control-label" for="name">Přezdívka</label>  
+                <div class="col-md-4">
+                    <input name="username" type="text" class="form-control input-md" required="">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-md-4 control-label" for="password">Heslo</label>
+                <div class="col-md-4">
+                    <input name="password" type="password" class="form-control input-md" required="">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="col-md-4 control-label" for="password">Heslo znovu</label>
+                <div class="col-md-4">
+                    <input name="password_twice" type="password" class="form-control input-md" required="">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="col-md-4 control-label" for="name">Jméno</label>  
+                <div class="col-md-4">
+                    <input name="name" type="text" class="form-control input-md" required="">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="col-md-4 control-label" for="name">Organizace</label>  
+                <div class="col-md-4">
+                    <input name="organization" type="text" class="form-control input-md" required="">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-md-4 control-label" for="signup"></label>
+                <div class="col-md-4">
+                    <button class="btn btn-success">Registrovat</button>
+                </div>
+            </div>
+
+        </fieldset>
+    </form>
+
+{% endblock %}

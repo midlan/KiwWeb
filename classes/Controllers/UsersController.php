@@ -14,7 +14,7 @@ class UsersManageController extends BaseController {
         $app = $this->getApp();
         $twig = $app->getTwig();
         
-        $users = User::getArrayByRole($app->getConnection(), User::ROLE_NONE);
+        $users = User::getArrayByRole($app, User::ROLE_NONE);
         
         $template = $twig->load('users.twig');
         

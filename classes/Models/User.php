@@ -118,24 +118,38 @@ class User extends BaseModel {
     
     public function fetchInto(array $data) {
         
-        $this->clear();
+        if(array_key_exists('user_id', $data)) {
+            $this->setUserId((int)$data['user_id']);
+        }
         
-        $this->setUserId((int)$data['user_id']);
-        $this->setRole((int)$data['role']);
-        $this->setUsername($data['username']);
+        if(array_key_exists('role', $data)) {
+            $this->setRole((int)$data['role']);
+        }
+        
+        if(array_key_exists('username', $data)) {
+            $this->setUsername((string)$data['username']);
+        }
         
         if(array_key_exists('password_hash', $data)) {
-            $this->setPasswordHash($data['password_hash']);
+            $this->setPasswordHash((string)$data['password_hash']);
         }
-        else {
-            $this->setPassword($data['password']);
+        elseif(array_key_exists('password', $data)) {
+            $this->setPassword((string)$data['password']);
         }
         
-        $this->setName($data['name']);
-        $this->setEmail($data['email']);
-        $this->setOrganization($data['organization']);
-
-        if($data['banned_date'] !== null) {
+        if(array_key_exists('name', $data)) {
+            $this->setName((string)$data['name']);
+        }
+        
+        if(array_key_exists('email', $data)) {
+            $this->setEmail((string)$data['email']);
+        }
+        
+        if(array_key_exists('organization', $data)) {
+            $this->setOrganization($data['organization']);
+        }
+        
+        if(array_key_exists('banned_date', $data) && $data['banned_date'] !== null) {
             $this->setBannedDate($data['banned_date']);
         }
     }
@@ -158,7 +172,47 @@ class User extends BaseModel {
         //uřivatel nalzen
         if($data !== false) {
             $this->fetchInto($data);
-            return true;
+            return $this->isLoaded();
+        }
+        
+        return false;
+    }
+    
+    public function loadByUsername(string $username): bool {
+        
+        $this->clear();
+        
+        $stmt =  $this->getConnection()->prepare('SELECT * FROM users WHERE username = :username LIMIT 1;');
+        
+        $stmt->bindParam(':username', $username);
+        $stmt->execute();
+        
+        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+        
+        //uřivatel nalzen
+        if($data !== false) {
+            $this->fetchInto($data);
+            return $this->isLoaded();
+        }
+        
+        return false;
+    }
+    
+    public function loadByEmail(string $email): bool {
+        
+        $this->clear();
+        
+        $stmt =  $this->getConnection()->prepare('SELECT * FROM users WHERE email = :email LIMIT 1;');
+        
+        $stmt->bindParam(':email', $email);
+        $stmt->execute();
+        
+        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+        
+        //uřivatel nalzen
+        if($data !== false) {
+            $this->fetchInto($data);
+            return $this->isLoaded();
         }
         
         return false;
@@ -178,7 +232,7 @@ class User extends BaseModel {
         //uřivatel nalzen a hesla se shodují
         if($data !== false && password_verify($password, $data['password_hash'])) {
             $this->fetchInto($data);
-            return true;
+            return $this->isLoaded();
         }
         
         return false;
@@ -240,9 +294,9 @@ class User extends BaseModel {
         return $stmt->execute();
     }
     
-    public static function getArrayByRole(\PDO $conn, int $role): array {
+    public static function getArrayByRole(\KivWeb\App $app, int $role): array {
         
-        $stmt = $conn->prepare('SELECT * FROM users WHERE role & :role = :role;');
+        $stmt = $app->getConnection()->prepare('SELECT * FROM users WHERE role & :role = :role;');
         
         $stmt->bindParam(':role', $role);
         $stmt->execute();
@@ -251,7 +305,7 @@ class User extends BaseModel {
         
         while(($row = $stmt->fetch(\PDO::FETCH_ASSOC)) !== false) {
             
-            $user = new self;
+            $user = new self($app);
             $user->fetchInto($row);
             
             $users[] = $user;

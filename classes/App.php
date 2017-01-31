@@ -65,6 +65,7 @@ class App {
             $conf = $this->config['pdo'];
         
             $this->conn = new \PDO($conf['dsn'], $conf['username'], $conf['password'], []);
+            $this->conn->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
         }
         
         return $this->conn;

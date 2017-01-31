@@ -99,8 +99,6 @@ class Review extends BaseModel {
     
     public function fetchInto(array $data) {
         
-        $this->clear();
-        
         $this->setReviewId((int)$data['review_id']);
         $this->setPostId((int)$data['post_id']);
         $this->setUserId((int)$data['user_id']);
@@ -132,7 +130,7 @@ class Review extends BaseModel {
         //recenze nalezena
         if($data !== false) {
             $this->fetchInto($data);
-            return true;
+            return $this->isLoaded();
         }
         
         return false;
@@ -182,7 +180,23 @@ class Review extends BaseModel {
         return $success;
     }
     
-    public static function getArrayByAuthor(\PDO $conn, int $userId): array {
-        throw new Exception('not implented yet');
+    public static function getArrayByAuthor(\KivWeb\App $app, int $userId): array {
+        
+        $stmt = $app->getConnection()->prepare('SELECT * FROM reviews WHERE user_id = :user_id;');
+        
+        $stmt->bindParam(':user_id', $userId);
+        $stmt->execute();
+        
+        $reviews = array();
+        
+        while(($row = $stmt->fetch(\PDO::FETCH_ASSOC)) !== false) {
+            
+            $review = new self($app);
+            $review->fetchInto($row);
+            
+            $reviews[] = $review;
+        }
+        
+        return $reviews;
     }
 }

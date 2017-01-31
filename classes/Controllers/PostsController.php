@@ -20,8 +20,9 @@ abstract class PostsController extends BaseController {
 
         if(!$post->isLoaded()) {
             $app->errorResponse(404, "Post with post_id {$_GET['post_id']} not found.");
-            return $post;
         }
+        
+        return $post;
     }
     
     protected function outputPdf(\KivWeb\Models\Post $post) {

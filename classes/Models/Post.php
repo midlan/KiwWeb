@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace KivWeb\Models;
 
+use \KivWeb\App;
 
 class Post extends BaseModel {
     
@@ -15,6 +16,10 @@ class Post extends BaseModel {
     private $abstract;
     private $pdf; 
     private $approved;
+    private $markOriginality;
+    private $markGramar;
+    private $markTopic;
+    private $authorName;
     
     public function getPostId() {
         return $this->postId;
@@ -40,6 +45,22 @@ class Post extends BaseModel {
         return $this->approved;
     }
 
+    public function getMarkOriginality() {
+        return $this->markOriginality;
+    }
+
+    public function getMarkGramar() {
+        return $this->markGramar;
+    }
+
+    public function getMarkTopic() {
+        return $this->markTopic;
+    }
+
+    public function getAuthorName() {
+        return $this->authorName;
+    }
+
     public function setPostId(int $postId) {
         $this->postId = $postId;
     }
@@ -59,6 +80,22 @@ class Post extends BaseModel {
     public function setPdf(string $pdf) {
         $this->pdf = $pdf;
     }
+    
+    public function setMarkOriginality(int $markOriginality) {
+        $this->markOriginality = $markOriginality;
+    }
+
+    public function setMarkGramar(int $markGramar) {
+        $this->markGramar = $markGramar;
+    }
+
+    public function setMarkTopic(int $markTopic) {
+        $this->markTopic = $markTopic;
+    }
+
+    public function setAuthorName(string $authorName) {
+        $this->authorName = $authorName;
+    }
 
     public function setApproved(int $approved) {
         $this->approved = $approved;
@@ -71,20 +108,52 @@ class Post extends BaseModel {
         $this->abstract = null;
         $this->pdf = null;
         $this->approved = null;
+        $this->markOriginality = null;
+        $this->markGramar = null;
+        $this->markTopic = null;
+        $this->authorName = null;
     }
     
     public function fetchInto(array $data) {
         
-        $this->clear();
+        if(array_key_exists('post_id', $data)) {
+            $this->setPostId((int)$data['post_id']);
+        }
         
-        $this->setPostId((int)$data['post_id']);
-        $this->setUserId((int)$data['user_id']);
-        $this->setTitle($data['title']);
-        $this->setAbstract((int)$data['abstract']);
-        $this->setPdf((int)$data['pdf']);
+        if(array_key_exists('user_id', $data)) {
+            $this->setUserId((int)$data['user_id']);
+        }
         
-        if($data['approved'] !== null) {
+        if(array_key_exists('title', $data)) {
+            $this->setTitle((string)$data['title']);
+        }
+        
+        if(array_key_exists('abstract', $data)) {
+            $this->setAbstract((string)$data['abstract']);
+        }
+        
+        if(array_key_exists('pdf', $data)) {
+            $this->setPdf((string)$data['pdf']);
+        }
+        
+        if(array_key_exists('approved', $data) && $data['approved'] !== null) {
             $this->setApproved($data['approved']);
+        }
+        
+        if(array_key_exists('mark_originality', $data)) {
+            $this->setMarkOriginality((int)$data['mark_originality']);
+        }
+        
+        if(array_key_exists('mark_gramar', $data)) {
+            $this->setMarkGramar((int)$data['mark_gramar']);
+        }
+        
+        if(array_key_exists('mark_topic', $data)) {
+            $this->setMarkTopic((int)$data['mark_topic']);
+        }
+        
+        if(array_key_exists('author_name', $data)) {
+            $this->setAuthorName((string)$data['author_name']);
         }
     }
     
@@ -148,7 +217,7 @@ class Post extends BaseModel {
         
         $this->clear();
         
-        $stmt =  $this->getConnection()->prepare('SELECT * FROM posts WHERE post_id = :post_id LIMIT 1;');
+        $stmt =  $this->getConnection()->prepare('SELECT p.*, u.name author_name FROM posts p JOIN users u USING(user_id) WHERE post_id = :post_id LIMIT 1;');
         
         $stmt->bindParam(':post_id', $postId);
         $stmt->execute();
@@ -158,7 +227,7 @@ class Post extends BaseModel {
         //příspěvek nalezen
         if($data !== false) {
             $this->fetchInto($data);
-            return true;
+            return $this->isLoaded();
         }
         
         return false;
@@ -170,13 +239,13 @@ class Post extends BaseModel {
         
         $query = $new ? 'INSERT INTO' : 'UPDATE';
         
-        $query .= ' reviews SET '
+        $query .= ' posts SET '
             . 'post_id = :post_id,'
             . 'user_id = :user_id,'
             . 'title = :title,'
             . 'abstract = :abstract,'
             . 'pdf = :pdf,'
-            . 'approved = :approved,';
+            . 'approved = :approved';
 
         if(!$new) {
             $query .= ' WHERE post_id = :post_id';
@@ -206,7 +275,7 @@ class Post extends BaseModel {
     
     public function delete(): bool {
         
-        if($this->isLoaded()) {
+        if(!$this->isLoaded()) {
             return false;
         }
         
@@ -217,13 +286,13 @@ class Post extends BaseModel {
         
     }
     
-    private static function stmtToObjectArray(\PDOStatement $stmt): array {
+    private static function stmtToObjectArray(App $app, \PDOStatement $stmt): array {
         
         $posts = array();
         
         while(($row = $stmt->fetch(\PDO::FETCH_ASSOC)) !== false) {
             
-            $post = new self;
+            $post = new self($app);
             $post->fetchInto($row);
             
             $posts[] = $post;
@@ -232,29 +301,41 @@ class Post extends BaseModel {
         return $posts;
     }
 
-    public static function getArrayByAuthorId(\PDO $conn, int $userId): array {
+    public static function getArrayByAuthorId(App $app, int $userId): array {
         
-        $stmt = $conn->prepare('SELECT * FROM posts WHERE user_id = :user_id;');
+        $stmt = $app->getConnection()->prepare('SELECT p.*, AVG(originality) mark_originality, AVG(gramar) mark_gramar, AVG(topic) mark_topic FROM posts p LEFT JOIN reviews r USING(post_id) WHERE p.user_id = :user_id GROUP BY post_id;');
         
         $stmt->bindParam(':user_id', $userId);
         $stmt->execute();
         
-        return self::stmtToObjectArray($stmt);
+        return self::stmtToObjectArray($app, $stmt);
     }
     
-    public static function getArrayToReviewBy(\PDO $conn, int $userId): array {
-        throw new Exception('not implented yet');
-        //todo is assigned to user
-        //todo approved IS NULL
+    public static function getArrayToReviewBy(App $app, int $userId): array {
+        
+        $stmt = $app->getConnection()->prepare('SELECT p.*, u.name author_name FROM posts p JOIN reviewers_assign a USING(post_id) JOIN users u ON p.user_id = u.user_id WHERE p.approved IS NULL AND a.user_id = :user_id;');
+        
+        $stmt->bindParam(':user_id', $userId);
+        $stmt->execute();
+        
+        return self::stmtToObjectArray($app, $stmt);
     }
     
-    public static function getArrayToAssign(\PDO $conn): array {
-        throw new Exception('not implented yet');
-        //todo approved IS NULL
+    public static function getArrayToAssign(App $app): array {
+        
+        $stmt = $app->getConnection()->prepare('SELECT * FROM posts WHERE approved IS NULL;');
+        
+        $stmt->execute();
+        
+        return self::stmtToObjectArray($app, $stmt);
     }
     
-    public static function getArrayApproved(\PDO $conn): array {
-        throw new Exception('not implented yet');
-        //todo approved = 1
+    public static function getArrayApproved(App $app): array {
+        
+        $stmt = $app->getConnection()->prepare('SELECT * FROM posts WHERE approved = 1;');
+        
+        $stmt->execute();
+        
+        return self::stmtToObjectArray($app, $stmt);
     }
 }

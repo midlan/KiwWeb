@@ -14,7 +14,7 @@ class IndexController extends BaseController {
         $app = $this->getApp();
         $twig = $this->getApp()->getTwig();
         
-        $posts = \KivWeb\Models\Post::getArrayApproved($app->getConnection());
+        $posts = \KivWeb\Models\Post::getArrayApproved($app);
         
         $template = $twig->load('index.twig');
         
@@ -79,8 +79,7 @@ class IndexController extends BaseController {
         $app = $this->getApp();
         
         if(
-            isset($_POST['user_id'])
-            && isset($_POST['username'])
+            isset($_POST['username'])
             && isset($_POST['password'])
             && isset($_POST['password_twice'])
             && isset($_POST['name'])
@@ -95,6 +94,20 @@ class IndexController extends BaseController {
             }
         
             $newUser = new User($app);
+            
+            //duplicitní email
+            if($newUser->loadByEmail((string)$_POST['email'])) {
+                $app->addMessage(App::MESSAGE_ERROR, "Email {$_POST['email']} je již obsazený.");
+                header('Location: ' . $app->getRouter()->buildUrl('index', 'registration'), true, 302);
+                return;
+            }
+            
+            //duplicitní přezdívka
+            if($newUser->loadByUsername((string)$_POST['username'])) {
+                $app->addMessage(App::MESSAGE_ERROR, "Přezdívka {$_POST['username']} je již obsazená.");
+                header('Location: ' . $app->getRouter()->buildUrl('index', 'registration'), true, 302);
+                return;
+            }
 
             $newUser->fetchInto($_POST);
 
@@ -112,6 +125,8 @@ class IndexController extends BaseController {
             }
             else {
                 $app->addMessage(App::MESSAGE_ERROR, 'Registrace se nezdařila.');
+                header('Location: ' . $app->getRouter()->buildUrl('index', 'registration'), true, 302);
+                return;
             }
         }
         

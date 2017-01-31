@@ -14,7 +14,7 @@ class PostsAuthoringController extends PostsController {
         $app = $this->getApp();
         $twig = $app->getTwig();
         
-        $posts = Post::getArrayByAuthorId($app->getConnection(), $app->getUser()->getUserId());
+        $posts = Post::getArrayByAuthorId($app, $app->getUser()->getUserId());
         
         $template = $twig->load('posts_authoring.twig');
         
@@ -57,7 +57,7 @@ class PostsAuthoringController extends PostsController {
         $template = $twig->load('post.twig');
         
         echo $template->render(array(
-            'post' => new Post($app),
+            'post' => $post,
         ));
     }
     
@@ -73,15 +73,27 @@ class PostsAuthoringController extends PostsController {
             
             $post = new Post($app);
             
+            $pdf = isset($_FILES['pdf']) && $_FILES['pdf']['error'] === UPLOAD_ERR_OK ? file_get_contents($_FILES['pdf']['tmp_name']) : '';
+            
             //editace
             if(isset($_POST['post_id'])) {
-                $post->loadById($_POST['post_id']);
+                $post->loadById((int)$_POST['post_id']);
+            }
+            //nový
+            elseif($pdf === '') {
+                $app->addMessage(App::MESSAGE_ERROR, 'PDF soubor je povinný.');
+                header('Location: ' . $app->getRouter()->buildUrl('postsAuthoring', 'add'), true, 302);
+                return;
             }
             
             //data
             $post->fetchInto($_POST);
-            //todo file
             $post->setUserId($app->getUser()->getUserId());
+            
+            //pdf soubor
+            if($pdf !== '') {
+                $post->setPdf($pdf);
+            }
             
             //uložení
             if($post->save()) {

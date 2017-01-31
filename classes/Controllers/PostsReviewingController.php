@@ -13,12 +13,11 @@ class PostsReviewingController extends PostsController {
     public function indexAction() {
         
         $app = $this->getApp();
-        $conn = $app->getConnection();
         $user = $app->getUser();
         $twig = $app->getTwig();
         
-        $posts = Post::getArrayToReviewBy($conn, $user->getUserId());
-        $reviews = Review::getArrayByAuthor($conn, $user->getUserId());
+        $posts = Post::getArrayToReviewBy($app, $user->getUserId());
+        $reviews = Review::getArrayByAuthor($app, $user->getUserId());
         
         $template = $twig->load('posts_reviewing.twig');
         
