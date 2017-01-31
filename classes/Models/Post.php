@@ -89,32 +89,55 @@ class Post extends BaseModel {
     }
     
     public function canBeApproved(): bool {
-        throw new Exception('not implented yet');
-        //todo select at least 3 reviews
-        self::MIN_REVIEWS_FOR_APPROVE;
-    }
-    
-    public function assignToReviewBy(int $userId): bool {
-        throw new Exception('not implented yet');
         
-        if($this->getApproved() === null) {
-            //todo insert reviewers_assign
+        $stmt = $this->getConnection()->prepare('SELECT COUNT(*) FROM reviews WHERE post_id = :post_id GROUP BY post_id;');
         
-            //todo on duplicate key ignore
-        }
+        $stmt->bindParam(':post_id', $this->getPostId());
+        $stmt->execute();
         
+        $reviewsCount = $stmt->fetchColumn();
         
-    }
-    
-    public function isAllowedToReviewBy(int $userId): bool {
-        throw new Exception('not implented yet');
-        
-        //rozhodnuté příspěvky už nelze hodnotit
-        if($this->getApproved() !== null) {
+        if($reviewsCount === false) {
             return false;
         }
         
-        //todo select from reviewers_assign
+        if($reviewsCount < self::MIN_REVIEWS_FOR_APPROVE) {
+            return false;
+        }
+        
+        return true;
+    }
+    
+    public function assignToReviewBy(int $userId): bool {
+        
+        //rozhodnuté příspěvky už nelze přiřazovat
+        if($this->isLoaded() && $this->getApproved() === null) {
+            
+            $stmt = $this->getConnection()->prepare('INSERT INTO reviewers_assign VALUES (:user_id, :post_id) ON DUPLICATE KEY UPDATE user_id = user_id;');
+        
+            $stmt->bindParam(':user_id', $userId);
+            $stmt->bindParam(':post_id', $this->getPostId());
+            return $stmt->execute();
+        }
+        
+        return false;
+    }
+    
+    public function isAllowedToReviewBy(int $userId): bool {
+        
+        //rozhodnuté příspěvky už nelze hodnotit
+        if($this->isLoaded() && $this->getApproved() === null) {
+            
+            $stmt = $this->getConnection()->prepare('SELECT 1 FROM reviewers_assign WHERE post_id = :post_id AND user_id = :user_id LIMIT 1;');
+        
+            $stmt->bindParam(':user_id', $userId);
+            $stmt->bindParam(':post_id', $this->getPostId());
+            $stmt->execute();
+            
+            return $stmt->fetchColumn() !== false;
+        }
+        
+        return false;
     }
     
     public function isLoaded(): bool {
@@ -187,7 +210,7 @@ class Post extends BaseModel {
             return false;
         }
         
-        $stmt =  $this->getConnection()->prepare('DELETE FROM posts WHERE post_id = :post_id LIMIT 1;');
+        $stmt = $this->getConnection()->prepare('DELETE FROM posts WHERE post_id = :post_id LIMIT 1;');
         
         $stmt->bindParam(':post_id', $this->getPostId());
         return $stmt->execute();
@@ -228,5 +251,10 @@ class Post extends BaseModel {
     public static function getArrayToAssign(\PDO $conn): array {
         throw new Exception('not implented yet');
         //todo approved IS NULL
+    }
+    
+    public static function getArrayApproved(\PDO $conn): array {
+        throw new Exception('not implented yet');
+        //todo approved = 1
     }
 }

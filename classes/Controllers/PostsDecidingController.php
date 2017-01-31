@@ -1,23 +1,30 @@
 <?php
 
-use \KivWeb\App,
-    \KivWeb\Models\Post;
-
 declare(strict_types=1);
 
 namespace KivWeb\Controllers;
+
+use \KivWeb\App,
+    \KivWeb\Models\Post,
+    \KivWeb\Models\User;
 
 class PostsDecidingController extends PostsController {
     
     public function indexAction() {
         
         $app = $this->getApp();
-        
+        $conn = $app->getConnection();
         $twig = $app->getTwig();
         
-        $posts = Post::getArrayToAssign($app->getConnection());
+        $posts = Post::getArrayToAssign($conn);
+        $reviewers = User::getArrayByRole($conn, User::ROLE_REVIEWER);
         
-        //todo render
+        $template = $twig->load('posts_decide.twig');
+        
+        echo $template->render(array(
+            'posts' => $posts,
+            'reviewers' => $reviewers,
+        ));
     }
     
     public function assignAction() {
@@ -50,7 +57,7 @@ class PostsDecidingController extends PostsController {
             
             $post = new Post($app);
             
-            $post->loadById($_GET['post_id']);
+            $post->loadById((int)$_GET['post_id']);
             $post->setApproved((int)($_POST['decision'] === 'yes'));
 
             if($post->isLoaded() && $post->canBeApproved() && $post->save()) {
@@ -77,7 +84,7 @@ class PostsDecidingController extends PostsController {
     }
 
     public function getRequiredRole(): int {
-        return \KivWeb\Models\User::ROLE_ADMIN;
+        return User::ROLE_ADMIN;
     }
 
 }

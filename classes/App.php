@@ -61,7 +61,7 @@ class App {
         
         if($this->conn === null) {
             
-            //todo koncipovat konfig obecně ne přímo pro PDO
+            //todo koncipovat konfig obecně ne přímo pro PDO?
             $conf = $this->config['pdo'];
         
             $this->conn = new \PDO($conf['dsn'], $conf['username'], $conf['password'], []);

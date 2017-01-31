@@ -228,6 +228,18 @@ class User extends BaseModel {
         return $success;
     }
     
+    public function delete(): bool {
+        
+        if($this->isLoaded()) {
+            return false;
+        }
+        
+        $stmt = $this->getConnection()->prepare('DELETE FROM users WHERE user_id = :user_id LIMIT 1;');
+        
+        $stmt->bindParam(':user_id', $this->getUserId());
+        return $stmt->execute();
+    }
+    
     public static function getArrayByRole(\PDO $conn, int $role): array {
         
         $stmt = $conn->prepare('SELECT * FROM users WHERE role & :role = :role;');

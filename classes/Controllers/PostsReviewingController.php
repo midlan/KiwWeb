@@ -1,12 +1,12 @@
 <?php
 
-use \KivWeb\App,
-    \KivWeb\Models\Post,
-    \KivWeb\Models\Review;
-
 declare(strict_types=1);
 
 namespace KivWeb\Controllers;
+
+use \KivWeb\App,
+    \KivWeb\Models\Post,
+    \KivWeb\Models\Review;
 
 class PostsReviewingController extends PostsController {
     
@@ -15,18 +15,29 @@ class PostsReviewingController extends PostsController {
         $app = $this->getApp();
         $conn = $app->getConnection();
         $user = $app->getUser();
+        $twig = $app->getTwig();
         
         $posts = Post::getArrayToReviewBy($conn, $user->getUserId());
         $reviews = Review::getArrayByAuthor($conn, $user->getUserId());
         
-        $twig = $app->getTwig();
+        $template = $twig->load('posts_reviewing.twig');
+        
+        echo $template->render(array(
+            'posts' => $posts,
+            'reviews' => $reviews,
+        ));
     }
     
     public function addAction() {
         
+        $app = $this->getApp();
         $twig = $app->getTwig();
         
-        //todo formulář na přidání recenze
+        $template = $twig->load('review.twig');
+        
+        echo $template->render(array(
+            'review' => new Review($app),
+        ));
     }
     
     public function editAction() {
@@ -39,7 +50,7 @@ class PostsReviewingController extends PostsController {
         }
         
         $review = new Review($app);
-        $review->loadById($_GET['review_id']);
+        $review->loadById((int)$_GET['review_id']);
         
         if(!$review->isLoaded()) {
             $app->addMessage(App::MESSAGE_ERROR, 'Hodnocení které se pokoušíte upravit neexistuje.');
@@ -64,8 +75,11 @@ class PostsReviewingController extends PostsController {
         
         $twig = $app->getTwig();
 
-        //todo render
-        //todo assign $post
+        $template = $twig->load('review.twig');
+        
+        echo $template->render(array(
+            'review' => $review,
+        ));
     }
     
     public function saveAction() {
@@ -118,10 +132,10 @@ class PostsReviewingController extends PostsController {
         }
         
         //nastavení dat
-        $review->fetchInto(array_merge(array(
-            'user_id' => $user->getUserId(),
-            'review_date' => date('Y-m-d H:i:s'),
-        ), $_POST));
+        $review->fetchInto($_POST);
+        $review->setUserId($user->getUserId());
+        $review->setReviewDate(date('Y-m-d H:i:s'));
+        
 
         //uložení
         if($review->save()) {

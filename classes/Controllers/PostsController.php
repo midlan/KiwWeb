@@ -16,7 +16,7 @@ abstract class PostsController extends BaseController {
             return $post;
         }
         
-        $post->loadById($_GET['post_id']);
+        $post->loadById((int)$_GET['post_id']);
 
         if(!$post->isLoaded()) {
             $app->errorResponse(404, "Post with post_id {$_GET['post_id']} not found.");

@@ -1,36 +1,98 @@
 <?php
 
-use \KivWeb\App,
-    \KivWeb\Models\Post;
-
 declare(strict_types=1);
 
 namespace KivWeb\Controllers;
+
+use \KivWeb\App,
+    \KivWeb\Models\Post;
 
 class PostsAuthoringController extends PostsController {
     
     public function indexAction() {
         
         $app = $this->getApp();
-        
         $twig = $app->getTwig();
         
         $posts = Post::getArrayByAuthorId($app->getConnection(), $app->getUser()->getUserId());
+        
+        $template = $twig->load('posts_authoring.twig');
+        
+        echo $template->render(array(
+            'posts' => $posts,
+        ));
     }
     
     public function addAction() {
         
-        //todo formulář na přidání postu
+        $app = $this->getApp();
+        $twig = $app->getTwig();
+        
+        $template = $twig->load('post.twig');
+        
+        echo $template->render(array(
+            'post' => new Post($app),
+        ));
     }
     
     public function editAction() {
         
-        //todo edit of post
+        $app = $this->getApp();
+        $twig = $app->getTwig();
+        
+        if(!isset($_GET['post_id'])) {
+            header('Location: ' . $app->getRouter()->buildUrl('postsAuthoring'), true, 302);
+            return;
+        }
+        
+        $post = new Post($app);
+        $post->loadById((int)$_GET['post_id']);
+        
+        if(!$post->isLoaded()) {
+            $app->addMessage(App::MESSAGE_ERROR, 'Příspěvek, který se pokoušíte upravit neexistuje.');
+            header('Location: ' . $app->getRouter()->buildUrl('postsAuthoring'), true, 302);
+            return;
+        }
+        
+        $template = $twig->load('post.twig');
+        
+        echo $template->render(array(
+            'post' => new Post($app),
+        ));
     }
     
     public function saveAction() {
         
-        //save new or edited post
+        $app = $this->getApp();
+        
+        if(
+            isset($_POST['title'])
+            && isset($_POST['abstract'])
+            && isset($_POST['abstract']) //todo file
+        ) {
+            
+            $post = new Post($app);
+            
+            //editace
+            if(isset($_POST['post_id'])) {
+                $post->loadById($_POST['post_id']);
+            }
+            
+            //data
+            $post->fetchInto($_POST);
+            //todo file
+            $post->setUserId($app->getUser()->getUserId());
+            
+            //uložení
+            if($post->save()) {
+                $app->addMessage(App::MESSAGE_SUCCESS, 'Příspěvek byl uložen.');
+            }
+            else {
+                $app->addMessage(App::MESSAGE_ERROR, 'Uložení příspěvku se nezdařilo.');
+            }
+        }
+        
+        header('Location: ' . $app->getRouter()->buildUrl('postsAuthoring'), true, 302);
     }
     
     public function deleteAction() {
@@ -52,7 +114,7 @@ class PostsAuthoringController extends PostsController {
                 $app->addMessage(App::MESSAGE_SUCCESS, 'Smazání příspěvku bylo úspěšné.');
             }
             else {
-                $app->addMessage(App::MESSAGE_ERROR,'Smazání příspěvku se nezdařilo.');
+                $app->addMessage(App::MESSAGE_ERROR, 'Smazání příspěvku se nezdařilo.');
             }
             
         }
@@ -63,6 +125,7 @@ class PostsAuthoringController extends PostsController {
     
     public function downloadAction() {
         
+        $app = $this->getApp();
         $post = $this->getDownloadingPost();
         
         if(!$post->isLoaded()) {
