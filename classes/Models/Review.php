@@ -44,7 +44,7 @@ class Review extends BaseModel {
         return $this->topic;
     }
 
-    public function getNote(): string {
+    public function getNote() {
         return $this->note;
     }
 
@@ -99,15 +99,35 @@ class Review extends BaseModel {
     
     public function fetchInto(array $data) {
         
-        $this->setReviewId((int)$data['review_id']);
-        $this->setPostId((int)$data['post_id']);
-        $this->setUserId((int)$data['user_id']);
-        $this->setReviewDate($data['review_date']);
-        $this->setOriginality((int)$data['originality']);
-        $this->setGramar((int)$data['gramar']);
-        $this->setTopic((int)$data['topic']);
+        if(array_key_exists('review_id', $data)) {
+            $this->setReviewId((int)$data['review_id']);
+        }
         
-        if($data['note'] !== null) {
+        if(array_key_exists('post_id', $data)) {
+            $this->setPostId((int)$data['post_id']);
+        }
+        
+        if(array_key_exists('user_id', $data)) {
+            $this->setUserId((int)$data['user_id']);
+        }
+        
+        if(array_key_exists('review_date', $data)) {
+            $this->setReviewDate($data['review_date']);
+        }
+        
+        if(array_key_exists('originality', $data)) {
+            $this->setOriginality((int)$data['originality']);
+        }
+        
+        if(array_key_exists('gramar', $data)) {
+            $this->setGramar((int)$data['gramar']);
+        }
+        
+        if(array_key_exists('topic', $data)) {
+            $this->setTopic((int)$data['topic']);
+        }
+        
+        if(array_key_exists('note', $data) && $data['note'] !== null) {
             $this->setNote($data['note']);
         }
     }
@@ -123,6 +143,27 @@ class Review extends BaseModel {
         $stmt =  $this->getConnection()->prepare('SELECT * FROM reviews WHERE review_id = :review_id LIMIT 1;');
         
         $stmt->bindParam(':review_id', $reviewId);
+        $stmt->execute();
+        
+        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+        
+        //recenze nalezena
+        if($data !== false) {
+            $this->fetchInto($data);
+            return $this->isLoaded();
+        }
+        
+        return false;
+    }
+    
+    public function loadByPostAndReviewer(int $reviewerId, int $postId): bool {
+        
+        $this->clear();
+        
+        $stmt =  $this->getConnection()->prepare('SELECT * FROM reviews WHERE user_id = :user_id AND post_id = :post_id LIMIT 1;');
+        
+        $stmt->bindParam(':user_id', $reviewerId);
+        $stmt->bindParam(':post_id', $postId);
         $stmt->execute();
         
         $data = $stmt->fetch(\PDO::FETCH_ASSOC);
@@ -174,7 +215,7 @@ class Review extends BaseModel {
         ));
         
         if($success && $new) {
-            $this->setReviewDate((int)$conn->lastInsertId());
+            $this->setReviewId((int)$conn->lastInsertId());
         }
         
         return $success;

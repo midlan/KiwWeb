@@ -1,6 +1,6 @@
 {% extends "skeleton.twig" %}
 
-{% block title %}Moje příspěvky{% endblock %}
+{% block title %}Schvalování příspěvků{% endblock %}
 
 {% block content %}
 
@@ -8,7 +8,7 @@
 
     <form class="form-inline" method="post" action="{{ router.buildPath('postsDeciding', 'assign') }}">
         <div class="form-group">
-            <label for="email">Příspěvek:</label>
+            <label >Příspěvek:</label>
             <select class="form-control" name="post_id">
                 {% for post in posts %}
                     <option value="{{ post.getPostId() }}">{{ post.getTitle() }}</option>
@@ -16,7 +16,7 @@
               </select>
         </div>
         <div class="form-group">
-            <label for="pwd">Recenzent:</label>
+            <label >Recenzent:</label>
             <select class="form-control" name="reviewer_id">
                 {% for reviewer in reviewers %}
                     <option value="{{ reviewer.getUserId() }}">{{ reviewer.getName() }}</option>

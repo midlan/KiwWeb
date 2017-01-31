@@ -137,7 +137,7 @@ class Post extends BaseModel {
         }
         
         if(array_key_exists('approved', $data) && $data['approved'] !== null) {
-            $this->setApproved($data['approved']);
+            $this->setApproved((int)$data['approved']);
         }
         
         if(array_key_exists('mark_originality', $data)) {

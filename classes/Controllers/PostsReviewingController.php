@@ -32,21 +32,46 @@ class PostsReviewingController extends PostsController {
         $app = $this->getApp();
         $twig = $app->getTwig();
         
+        if(isset($_GET['post_id']) && isset($_GET['review_id'])) {
+            header('Location: ' . $app->getRouter()->buildUrl('postsReviewing'), true, 302);
+            return;
+        }
+        
+        $existingReview = new Review($app);
+        $existingReview->loadByPostAndReviewer($app->getUser()->getUserId(), (int)$_GET['post_id']);
+        
+        //recenze už  existuje, přesměrovat na edit
+        if($existingReview->isLoaded()) {
+            header('Location: ' . $app->getRouter()->buildUrl('postsReviewing', 'edit', array('review_id' => $existingReview->getReviewId())), true, 302);
+            return;
+        }
+        
+        $post = new Post($app);
+        $post->loadById((int)$_GET['post_id']);
+
+        if(!$post->isLoaded()) {
+            $app->addMessage(App::MESSAGE_ERROR, 'Přípěvek, který se pokoušíte hodnotit neexistuje.');
+            header('Location: ' . $app->getRouter()->buildUrl('postsReviewing'), true, 302);
+            return;
+        }
+
+        if(!$post->isAllowedToReviewBy($app->getUser()->getUserId())) {
+            $app->addMessage(App::MESSAGE_ERROR, 'Přípěvek, který se pokoušíte hodnotit Vám nebyl k hodnocení přidělen.');
+            header('Location: ' . $app->getRouter()->buildUrl('postsReviewing'), true, 302);
+            return;
+        }
+        
         $template = $twig->load('review.twig');
         
         echo $template->render(array(
             'review' => new Review($app),
+            'post_id' => $post->getPostId(),
         ));
     }
     
     public function editAction() {
         
         $app = $this->getApp();
-        
-        if(isset($_GET['post_id']) && isset($_GET['review_id'])) {
-            header('Location: ' . $app->getRouter()->buildUrl('postsReviewing'), true, 302);
-            return;
-        }
         
         $review = new Review($app);
         $review->loadById((int)$_GET['review_id']);
@@ -58,7 +83,7 @@ class PostsReviewingController extends PostsController {
         }
             
         $post = new Post($app);
-        $post->loadById((int)$_GET['post_id']);
+        $post->loadById($review->getPostId());
 
         if(!$post->isLoaded()) {
             $app->addMessage(App::MESSAGE_ERROR, 'Přípěvek, který se pokoušíte hodnotit neexistuje.');
@@ -78,6 +103,7 @@ class PostsReviewingController extends PostsController {
         
         echo $template->render(array(
             'review' => $review,
+            'post_id' => null,
         ));
     }
     
@@ -86,17 +112,17 @@ class PostsReviewingController extends PostsController {
         $app = $this->getApp();
         $user = $app->getUser();
         
-        if(
-            isset($_POST['review_id']) xor isset($_POST['post_id'])
+        if(!
+            (isset($_POST['review_id']) or isset($_POST['post_id'])
             && isset($_POST['originality'])
             && isset($_POST['gramar'])
             && isset($_POST['topic'])
-            && isset($_POST['note'])
+            && isset($_POST['note']))
         ) {
             header('Location: ' . $app->getRouter()->buildUrl('postsReviewing'), true, 302);
             return;
         }
-            
+        
         $review = new Review($app);
         $post = new Post($app);
         
@@ -134,7 +160,7 @@ class PostsReviewingController extends PostsController {
         $review->fetchInto($_POST);
         $review->setUserId($user->getUserId());
         $review->setReviewDate(date('Y-m-d H:i:s'));
-        
+
 
         //uložení
         if($review->save()) {

@@ -1,7 +1,31 @@
 {% extends "skeleton.twig" %}
 
-{% block title %}Registrace{% endblock %}
+{% block title %}Hodnocení příspěvků{% endblock %}
 
 {% block content %}
-    todo obsah registrace
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Autor</th>
+                <th>Název</th>
+                <th>Abstrakt</th>
+                <th>Stav</th>
+                <th>Akce</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for post in posts %}
+                <tr>
+                    <td>{{ post.getAuthorName() }}</td>
+                    <td>{{ post.getTitle() }}</td>
+                    <td>{{ post.getAbstract() }}</td>
+                    <th>{% if post.getApproved() is null %}Nerozhodnuto{% elseif post.getApproved() %}Schváleno{% else %}Zamítnuto{% endif %}</th>
+                    <td>
+                        <a href="{{ router.buildPath('postsAuthoring', 'download', {"post_id": post.getPostId()}) }}" class="btn btn-primary"><span class="glyphicon glyphicon-download"></span> Stáhnout PDF</a>
+                        <a href="{{ router.buildPath('postsReviewing', 'add', {"post_id": post.getPostId()}) }}" class="btn btn-success">Hodnotit</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 {% endblock %}

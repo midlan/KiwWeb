@@ -1,7 +1,52 @@
 {% extends "skeleton.twig" %}
 
-{% block title %}Registrace{% endblock %}
+{% block title %}{% if review.isLoaded() %}Upravit{% else %}Přidat{% endif %} hodnocení{% endblock %}
 
 {% block content %}
-    todo obsah registrace
+    <form class="form-horizontal" method="post" action="{{ router.buildPath('postsReviewing', 'save') }}">
+        <fieldset>
+
+            {% if review.isLoaded() %}<input type="hidden" name="review_id" value="{{ review.getReviewId() }}">{% endif %}
+            {% if post_id is not null %}<input type="hidden" name="post_id" value="{{ post_id }}">{% endif %}
+            
+            <legend>{% if review.isLoaded() %}Upravit{% else %}Přidat{% endif %} hodnocení</legend>
+            
+            <div class="form-group">
+                <label class="col-md-4 control-label" >Originalita</label>
+                <div class="col-md-4">
+                    <input name="originality" type="number" step="1" min="1" max="5" value="{{ review.getOriginality() }}" class="form-control input-md" required="">
+                </div>
+            </div>
+                
+            <div class="form-group">
+                <label class="col-md-4 control-label" >Gramatika</label>
+                <div class="col-md-4">
+                    <input name="gramar" type="number" step="1" min="1" max="5" value="{{ review.getGramar() }}" class="form-control input-md" required="">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="col-md-4 control-label" >Téma</label>
+                <div class="col-md-4">
+                    <input name="topic" type="number" step="1" min="1" max="5" value="{{ review.getTopic() }}" class="form-control input-md" required="">
+                </div>
+            </div> 
+            
+            <div class="form-group">
+                <label class="col-md-4 control-label" >Poznámka</label>
+                <div class="col-md-4">
+                    <textarea name="note" class="form-control" rows="5" id="comment" >{{ review.getNote() }}</textarea>
+                </div>
+            </div>
+                
+            <div class="form-group">
+                <label class="col-md-4 control-label" ></label>
+                <div class="col-md-4">
+                    <button class="btn btn-success">Uložit</button>
+                </div>
+            </div>
+
+        </fieldset>
+    </form>
+
 {% endblock %}
