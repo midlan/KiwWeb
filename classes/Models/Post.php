@@ -323,7 +323,7 @@ class Post extends BaseModel {
     
     public static function getArrayToAssign(App $app): array {
         
-        $stmt = $app->getConnection()->prepare('SELECT * FROM posts WHERE approved IS NULL;');
+        $stmt = $app->getConnection()->prepare('SELECT p.*, u.name author_name, AVG(originality) mark_originality, AVG(gramar) mark_gramar, AVG(topic) mark_topic FROM posts p JOIN users u USING(user_id) LEFT JOIN reviews r USING(post_id) WHERE approved IS NULL GROUP BY post_id;');
         
         $stmt->execute();
         

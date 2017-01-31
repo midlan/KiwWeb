@@ -34,9 +34,9 @@ class PostsDecidingController extends PostsController {
             
             $post = new Post($app);
             
-            $post->loadById((int)$_GET['post_id']);
+            $post->loadById((int)$_POST['post_id']);
 
-            if($post->isLoaded() && $post->assignToReviewBy($_POST['reviewer_id'])) {
+            if($post->isLoaded() && $post->assignToReviewBy((int)$_POST['reviewer_id'])) {
                 $app->addMessage(App::MESSAGE_SUCCESS, 'Příspěvek byl přidělen recenzentovi.');
             }
             else {
@@ -56,10 +56,22 @@ class PostsDecidingController extends PostsController {
             
             $post = new Post($app);
             
-            $post->loadById((int)$_GET['post_id']);
+            $post->loadById((int)$_POST['post_id']);
             $post->setApproved((int)($_POST['decision'] === 'yes'));
+            
+            if(!$post->isLoaded()) {
+                $app->addMessage(App::MESSAGE_ERROR, 'Přípěvek, který jste se pokusili schválit neexistuje.');
+                header('Location: ' . $app->getRouter()->buildUrl('postsDeciding'), true, 302);
+                return;
+            }
+            
+            if(!$post->canBeApproved()) {
+                $app->addMessage(App::MESSAGE_WARNING, 'Přípěvek nesplňuje podmínky pro schválení.');
+                header('Location: ' . $app->getRouter()->buildUrl('postsDeciding'), true, 302);
+                return;
+            }
 
-            if($post->isLoaded() && $post->canBeApproved() && $post->save()) {
+            if($post->save()) {
                 $app->addMessage(App::MESSAGE_SUCCESS, 'Příspěvek byl schválen.');
             }
             else {
