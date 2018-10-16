@@ -95,7 +95,10 @@ class Router {
             $section = $this->defaultSection;
         }
         
-        $section[0] = \chr(\ord($section[0]) - 32); //zvětšit první písmeno, jen pokud bylo malé; todo co utf8?
+        //zvětšit první písmeno, jen pokud bylo malé
+        $section = preg_replace_callback ('~^\\p{Ll}~suD', function($matches) {
+            return mb_strtoupper ($matches[0], 'UTF-8');
+        }, $section, 1);
         
         return "{$this->controllersNamespace}\\{$section}Controller";
     }

@@ -148,7 +148,7 @@ class App {
         $configJson = file_get_contents($configFile);
         
         if($configJson === false) {
-            $this->response500('Cannot read config file ' . $configFile);
+            $this->errorResponse(500, 'Cannot read config file ' . $configFile);
             return;
         }
         
@@ -157,10 +157,10 @@ class App {
         if(!is_array($this->config)) {
             
             if($this->config === null) {
-                $this->response500('Cannot parse config: ' . json_last_error_msg());
+                $this->errorResponse(500, 'Cannot parse config: ' . json_last_error_msg());
             }
             else {
-                $this->response500('Config is not array.');
+                $this->errorResponse(500, 'Config is not array.');
             }
             
             return;
